@@ -454,36 +454,7 @@ alembic downgrade -1
 alembic history
 ```
 
-### Claude Code Skills
 
-This project includes 7 custom Claude Code skills for common tasks:
-
-```bash
-# Setup new developer environment
-/skill environment-setup
-
-# Create API endpoint tests
-/skill api-endpoint-test
-
-# Audit security vulnerabilities
-/skill security-audit
-
-# Generate OAuth integration
-/skill oauth-integration
-
-# Create database migration
-/skill database-migration
-
-# Debug post generation issues
-/skill post-generation-debug
-
-# Rotate security credentials
-/skill credential-rotation
-```
-
-Skills are located in `.claude/skills/` with detailed documentation.
-
----
 
 ## Testing
 
@@ -565,37 +536,6 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 ```
-
----
-
-## Roadmap
-
-### Q1 2025
-- [ ] GitHub Actions CI/CD pipeline
-- [ ] Automated dependency updates (Dependabot)
-- [ ] Multi-language support (i18n)
-- [ ] Browser extension for quick posting
-- [ ] Mobile app (React Native)
-
-### Q2 2025
-- [ ] Advanced analytics dashboard
-- [ ] Scheduled posting
-- [ ] Content calendar view
-- [ ] Team collaboration features
-- [ ] WordPress plugin
-
-### Q3 2025
-- [ ] Additional AI providers (Gemini, Llama)
-- [ ] Custom prompt templates
-- [ ] A/B testing for posts
-- [ ] Image generation (DALL-E integration)
-- [ ] Video transcription and summarization
-
-### Long-term
-- [ ] Self-hosted AI models (Ollama support)
-- [ ] Blockchain-based content verification
-- [ ] Decentralized storage (IPFS)
-- [ ] Native desktop apps (Electron)
 
 **Vote on features**: [GitHub Discussions](https://github.com/larry311012/ai-news-hub/discussions)
 
