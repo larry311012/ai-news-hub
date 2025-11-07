@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My News Sources - AI News Hub</title>
+    <link rel="stylesheet" href="/src/style.css">
+
+    <!-- Heroicons CSS for consistent icons -->
+    <style>
+        /* Custom animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="feed-management-app">
+        <!-- Loading State -->
+        <div v-if="loading" class="min-h-screen flex items-center justify-center">
+            <div class="text-center">
+                <svg class="animate-spin h-12 w-12 text-indigo-600 mx-auto" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-4 text-gray-600">Loading your news sources...</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div v-else class="min-h-screen bg-gray-50">
+            <!-- Header with Stats -->
+            <div class="bg-white border-b border-gray-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <!-- Back button and title -->
+                    <div class="mb-6">
+                        <button @click="goBack" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors mb-4">
+                            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to News Feed
+                        </button>
+                        <h1 class="text-2xl font-bold text-gray-900">My News Sources</h1>
+                        <p class="mt-1 text-sm text-gray-600">
+                            Manage your custom news feeds and sources
+                        </p>
+                    </div>
+
+                    <!-- Stats Dashboard -->
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <!-- Total Sources -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total Sources</dt>
+                                        <dd class="text-2xl font-semibold text-gray-900">{{ stats.totalFeeds }}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Sources -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Active</dt>
+                                        <dd class="text-2xl font-semibold text-green-600">{{ stats.healthyFeeds }}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Needs Attention -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Needs Attention</dt>
+                                        <dd class="text-2xl font-semibold text-red-600">{{ stats.errorFeeds }}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Items Today -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Items Today</dt>
+                                        <dd class="text-2xl font-semibold text-blue-600">{{ stats.itemsFetchedToday }}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <!-- Search Input -->
+                    <div class="w-full sm:w-96">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                v-model="searchQuery"
+                                type="text"
+                                placeholder="Search sources..."
+                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Add Source Button -->
+                    <button
+                        @click="showAddModal"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                    >
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Source
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feed List -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+                <!-- Empty State -->
+                <div v-if="filteredFeeds.length === 0 && !loading" class="text-center py-12">
+                    <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                    </svg>
+                    <h3 class="mt-4 text-lg font-semibold text-gray-900">
+                        {{ searchQuery ? 'No sources found' : 'No news sources yet' }}
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-600">
+                        {{ searchQuery ? 'Try adjusting your search.' : 'Add your first source to start collecting articles' }}
+                    </p>
+                    <button
+                        v-if="!searchQuery"
+                        @click="showAddModal"
+                        class="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Source
+                    </button>
+                </div>
+
+                <!-- Feed Grid -->
+                <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <feed-card
+                        v-for="feed in filteredFeeds"
+                        :key="feed.id"
+                        :feed="feed"
+                        @test="handleTest"
+                        @edit="handleEdit"
+                        @delete="handleDelete"
+                        class="animate-fadeIn"
+                    ></feed-card>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast notifications will be handled by ToastNotification component -->
+    </div>
+
+    <!-- Vue 3 from CDN -->
+    <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.js"></script>
+
+    <!-- App Script -->
+    <script type="module">
+        import { createApp } from 'https://unpkg.com/vue@3.3.4/dist/vue.esm-browser.js';
+
+        // Import utility functions
+        const API_BASE_URL = 'http://localhost:8000/api';
+
+        // Feed Card Component
+        const FeedCard = {
+            name: 'FeedCard',
+            props: {
+                feed: {
+                    type: Object,
+                    required: true
+                }
+            },
+            emits: ['test', 'edit', 'delete'],
+            computed: {
+                statusBadgeClass() {
+                    const classes = {
+                        'healthy': 'bg-green-100 text-green-800',
+                        'warning': 'bg-yellow-100 text-yellow-800',
+                        'error': 'bg-red-100 text-red-800',
+                        'unknown': 'bg-gray-100 text-gray-800'
+                    };
+                    return classes[this.feed.health_status] || 'bg-gray-100 text-gray-800';
+                },
+                statusText() {
+                    const text = {
+                        'healthy': 'Active',
+                        'warning': 'Slow',
+                        'error': 'Error',
+                        'unknown': 'Unknown'
+                    };
+                    return text[this.feed.health_status] || 'Unknown';
+                },
+                iconColor() {
+                    const colors = {
+                        'healthy': 'text-green-600',
+                        'warning': 'text-yellow-600',
+                        'error': 'text-red-600',
+                        'unknown': 'text-gray-400'
+                    };
+                    return colors[this.feed.health_status] || 'text-gray-400';
+                },
+                updateFrequencyText() {
+                    const minutes = this.feed.update_frequency / 60;
+                    if (minutes < 60) return `${minutes}min`;
+                    const hours = minutes / 60;
+                    return `${hours}hr`;
+                },
+                lastFetchedText() {
+                    if (!this.feed.last_fetched_at) return 'Never';
+                    return this.timeAgo(this.feed.last_fetched_at);
+                }
+            },
+            methods: {
+                timeAgo(date) {
+                    const now = new Date();
+                    const then = new Date(date);
+                    const diffMs = now - then;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    if (diffMins < 1) return 'Just now';
+                    if (diffMins < 60) return `${diffMins}m ago`;
+                    if (diffHours < 24) return `${diffHours}h ago`;
+                    if (diffDays < 7) return `${diffDays}d ago`;
+                    return `${Math.floor(diffDays / 7)}w ago`;
+                },
+                handleDelete() {
+                    if (confirm(`Are you sure you want to remove "${this.feed.feed_name}"?`)) {
+                        this.$emit('delete', this.feed.id);
+                    }
+                }
+            },
+            template: `
+                <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                    <!-- Header -->
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-3 flex-1">
+                            <div class="flex-shrink-0">
+                                <svg class="h-8 w-8" :class="iconColor" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-gray-900 truncate">{{ feed.feed_name }}</h3>
+                                <p class="text-xs text-gray-600 mt-1 line-clamp-2">{{ feed.feed_description || 'No description' }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <span :class="statusBadgeClass" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ml-2">
+                            {{ statusText }}
+                        </span>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="mt-4 grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-lg font-semibold text-gray-900">{{ feed.total_items_fetched || 0 }}</p>
+                            <p class="text-xs text-gray-600">Items</p>
+                        </div>
+                        <div>
+                            <p class="text-lg font-semibold text-gray-900">{{ updateFrequencyText }}</p>
+                            <p class="text-xs text-gray-600">Updates</p>
+                        </div>
+                        <div>
+                            <p class="text-lg font-semibold text-gray-900">{{ lastFetchedText }}</p>
+                            <p class="text-xs text-gray-600">Last Check</p>
+                        </div>
+                    </div>
+
+                    <!-- Error Message (if any) -->
+                    <div v-if="feed.health_status === 'error'" class="mt-3 p-2 bg-red-50 rounded">
+                        <p class="text-xs text-red-800">{{ feed.error_message || 'Connection error' }}</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-4 flex items-center justify-between border-t border-gray-200 pt-3">
+                        <div class="flex space-x-2">
+                            <button
+                                @click="$emit('test', feed.id)"
+                                class="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                                title="Test connection"
+                            >
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+                            <button
+                                @click="$emit('edit', feed.id)"
+                                class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                title="Edit settings"
+                            >
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <button
+                            @click="handleDelete"
+                            class="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            title="Remove source"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `
+        };
+
+        // Main App
+        const app = createApp({
+            components: {
+                'feed-card': FeedCard
+            },
+            data() {
+                return {
+                    loading: true,
+                    feeds: [],
+                    stats: {
+                        totalFeeds: 0,
+                        healthyFeeds: 0,
+                        warningFeeds: 0,
+                        errorFeeds: 0,
+                        itemsFetchedToday: 0
+                    },
+                    searchQuery: ''
+                };
+            },
+            computed: {
+                filteredFeeds() {
+                    if (!this.searchQuery) return this.feeds;
+
+                    const query = this.searchQuery.toLowerCase();
+                    return this.feeds.filter(feed =>
+                        feed.feed_name.toLowerCase().includes(query) ||
+                        (feed.feed_description && feed.feed_description.toLowerCase().includes(query))
+                    );
+                }
+            },
+            methods: {
+                async loadFeeds() {
+                    try {
+                        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+                        if (!token) {
+                            window.location.href = '/auth.html';
+                            return;
+                        }
+
+                        const response = await fetch(`${API_BASE_URL}/user-feeds`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+
+                        if (response.status === 401) {
+                            window.location.href = '/auth.html';
+                            return;
+                        }
+
+                        if (!response.ok) {
+                            throw new Error('Failed to load feeds');
+                        }
+
+                        const data = await response.json();
+                        this.feeds = data.feeds || [];
+                        this.stats = {
+                            totalFeeds: data.total_feeds || 0,
+                            healthyFeeds: data.healthy_feeds || 0,
+                            warningFeeds: data.warning_feeds || 0,
+                            errorFeeds: data.error_feeds || 0,
+                            itemsFetchedToday: data.items_fetched_today || 0
+                        };
+                    } catch (error) {
+                        console.error('Error loading feeds:', error);
+                        this.showToast('Failed to load news sources', 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                goBack() {
+                    window.location.href = '/index.html';
+                },
+                showAddModal() {
+                    alert('Add Source Modal will be implemented in Week 2 (Task 2.2).\n\nFor now, this is a placeholder.');
+                },
+                handleTest(feedId) {
+                    alert(`Test feed connection for feed ID: ${feedId}\n\nThis feature will be fully implemented with the Feed Test Progress component.`);
+                },
+                handleEdit(feedId) {
+                    alert(`Edit feed settings for feed ID: ${feedId}\n\nEdit functionality will be added in the next iteration.`);
+                },
+                async handleDelete(feedId) {
+                    try {
+                        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+                        const response = await fetch(`${API_BASE_URL}/user-feeds/${feedId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+
+                        if (response.ok) {
+                            this.feeds = this.feeds.filter(f => f.id !== feedId);
+                            this.stats.totalFeeds--;
+                            this.showToast('Source removed successfully', 'success');
+                        } else {
+                            throw new Error('Failed to delete feed');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting feed:', error);
+                        this.showToast('Failed to remove source', 'error');
+                    }
+                },
+                showToast(message, type = 'success') {
+                    // Simple toast implementation
+                    const toast = document.createElement('div');
+                    const bgColors = {
+                        success: 'bg-green-500',
+                        error: 'bg-red-500',
+                        warning: 'bg-yellow-500',
+                        info: 'bg-blue-500'
+                    };
+
+                    toast.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white ${bgColors[type]} transition-all transform`;
+                    toast.textContent = message;
+
+                    document.body.appendChild(toast);
+
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        setTimeout(() => document.body.removeChild(toast), 300);
+                    }, 3000);
+                }
+            },
+            async mounted() {
+                await this.loadFeeds();
+            }
+        });
+
+        app.mount('#feed-management-app');
+    </script>
+</body>
+</html>

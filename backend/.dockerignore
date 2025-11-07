@@ -1,0 +1,91 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.db
+*.db-journal
+coverage.xml
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+*.txt
+!requirements.txt
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Temporary files
+*.tmp
+*.bak
+.DS_Store
+
+# Terraform
+infrastructure/
+*.tf
+*.tfstate
+*.tfvars
+
+# Scripts
+*.sh
+!start_backend.sh
+
+# Working files
+*.json
+!package.json
+IMAGE_PERSISTENCE_*
+INSTAGRAM_*
+INTEGRATION_TEST_*
+RESTART_*
+SOCIAL_MEDIA_*
+*.orig

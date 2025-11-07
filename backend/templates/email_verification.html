@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding: 40px 40px 20px 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px 8px 0 0;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 600;">
+                                AI Post Generator
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <h2 style="color: #333333; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+                                Welcome! Verify Your Email
+                            </h2>
+
+                            <p style="color: #666666; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                                Hi <strong>{{full_name}}</strong>,
+                            </p>
+
+                            <p style="color: #666666; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                                Thank you for registering with AI Post Generator! We're excited to have you on board. To get started, please verify your email address by clicking the button below:
+                            </p>
+
+                            <!-- Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" style="padding: 20px 0;">
+                                        <a href="{{verification_link}}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
+                                            Verify Email Address
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="color: #666666; font-size: 14px; line-height: 1.6; margin: 30px 0 10px 0;">
+                                Or copy and paste this link into your browser:
+                            </p>
+
+                            <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 15px; word-break: break-all;">
+                                <a href="{{verification_link}}" style="color: #667eea; text-decoration: none; font-size: 14px;">
+                                    {{verification_link}}
+                                </a>
+                            </div>
+
+                            <!-- Security Notice -->
+                            <div style="margin-top: 40px; padding: 20px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                <p style="color: #856404; font-size: 14px; line-height: 1.6; margin: 0;">
+                                    <strong>Security Notice:</strong> This verification link will expire in <strong>24 hours</strong>. If you didn't create an account, please disregard this email or contact our support team.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 8px 8px; border-top: 1px solid #e9ecef;">
+                            <p style="color: #999999; font-size: 14px; line-height: 1.6; margin: 0 0 10px 0; text-align: center;">
+                                Questions? Contact us at <a href="mailto:support@example.com" style="color: #667eea; text-decoration: none;">support@example.com</a>
+                            </p>
+                            <p style="color: #999999; font-size: 12px; line-height: 1.6; margin: 0; text-align: center;">
+                                &copy; 2025 AI Post Generator. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

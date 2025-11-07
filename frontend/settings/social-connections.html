@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Connections - Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .animate-slideUp {
+            animation: slideUp 200ms ease-out;
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 200ms ease-in-out;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Focus visible for accessibility */
+        *:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0f172a;
+                color: #f1f5f9;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-slate-900 min-h-screen">
+    <!-- Settings Page Container -->
+    <div id="app" class="max-w-3xl mx-auto px-4 py-8 md:px-6 md:py-12">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 mb-2">
+                Connected Accounts
+            </h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Manage your social media connections to share your content across platforms
+            </p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div v-if="connectedCount > 0" class="mb-6 animate-slideUp">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        {{ connectedCount }} of {{ totalCount }} accounts connected
+                    </span>
+                    <span class="text-sm text-blue-700 dark:text-blue-300">
+                        {{ Math.round((connectedCount / totalCount) * 100) }}%
+                    </span>
+                </div>
+                <div class="w-full h-2 bg-blue-100 dark:bg-blue-900/30 rounded-full overflow-hidden">
+                    <div
+                        class="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-300"
+                        :style="{ width: `${(connectedCount / totalCount) * 100}%` }">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div v-if="toast.show"
+             :class="toast.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/50' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900/50'"
+             class="mb-6 border rounded-lg p-4 animate-slideUp"
+             role="alert">
+            <div class="flex items-start">
+                <svg v-if="toast.type === 'success'" class="w-5 h-5 text-green-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <svg v-else class="w-5 h-5 text-red-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <div class="ml-3 flex-1">
+                    <p :class="toast.type === 'success' ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'" class="text-sm font-medium">
+                        {{ toast.message }}
+                    </p>
+                    <p v-if="toast.description" :class="toast.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'" class="text-xs mt-1">
+                        {{ toast.description }}
+                    </p>
+                </div>
+                <button @click="toast.show = false"
+                        :class="toast.type === 'success' ? 'text-green-400 hover:text-green-600' : 'text-red-400 hover:text-red-600'"
+                        class="ml-auto">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Connection Cards -->
+        <div class="space-y-4">
+            <!-- LinkedIn Card -->
+            <connection-card
+                :connection="connections.linkedin"
+                @connect="handleConnect('linkedin')"
+                @disconnect="handleDisconnect('linkedin')">
+            </connection-card>
+
+            <!-- Twitter/X Card -->
+            <connection-card
+                :connection="connections.twitter"
+                @connect="handleConnect('twitter')"
+                @disconnect="handleDisconnect('twitter')">
+            </connection-card>
+
+            <!-- Threads Card -->
+            <connection-card
+                :connection="connections.threads"
+                @connect="handleConnect('threads')"
+                @disconnect="handleDisconnect('threads')">
+            </connection-card>
+        </div>
+
+        <!-- Empty State -->
+        <div v-if="connectedCount === 0" class="mt-12 text-center py-12 px-4 animate-fadeIn">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
+                <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-2">
+                No Accounts Connected Yet
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 max-w-sm mx-auto">
+                Connect your social media accounts to start sharing your content across multiple platforms
+            </p>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/50 rounded-lg p-6">
+            <div class="flex items-start space-x-3">
+                <svg class="w-6 h-6 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">Need Help?</h3>
+                    <p class="text-sm text-blue-800 dark:text-blue-200 mb-3">
+                        Your credentials are securely encrypted and never shared. Each platform requires authorization to post on your behalf.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="social-connections.js"></script>
+</body>
+</html>

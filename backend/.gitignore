@@ -1,0 +1,48 @@
+
+# Database files
+*.db
+ai_news.db
+test_posts_v2.db
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Test results and reports
+test_results.txt
+test_results_final.txt
+test_results/
+*_TEST_RESULTS.json
+*_TEST_REPORT*.json
+*_DIAGNOSTIC_RESULTS.json
+*_REPORT.json
+*.test.sh
+test_*.sh
+QUICK_*.sh
+TEST_*.py
+TEST_*.sh
+*.orig
+*.backup*
+*.before_fix
+*.bak
+.*.bak
+*.SKIP
+
+# Development files
+/*.html
+api/*.html
+add_*.py
+apply_*.sh
+fix_*.sh
+verify_*.sh
+verify_*.sql
+diagnose_*.py
+create_*.py
+debug_*.py
+example_*.py
+update_*.py
+
+# Static files - Instagram images (user-generated content)
+static/instagram_images/*
+!static/instagram_images/.gitkeep

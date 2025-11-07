@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - AI News Hub</title>
+        <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-gray-50">
+    <div id="profile-app">
+        <!-- Loading State -->
+        <div v-if="loading" class="min-h-screen flex items-center justify-center">
+            <div class="text-center">
+                <svg class="animate-spin h-12 w-12 text-indigo-600 mx-auto" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-4 text-gray-600">Loading profile...</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div v-else class="min-h-screen py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Header -->
+                <div class="mb-8">
+                    <button @click="goBack" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors mb-4">
+                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to News Feed
+                    </button>
+                    <h1 class="text-3xl font-bold text-gray-900">Your Profile</h1>
+                    <p class="mt-2 text-sm text-gray-600">Manage your account settings and preferences</p>
+                </div>
+
+                <!-- Session Warning -->
+                <div v-if="sessionWarning" class="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                    <div class="flex">
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="ml-3 text-sm text-yellow-700">Your session will expire in 5 minutes. Please save your work.</p>
+                    </div>
+                </div>
+
+                <!-- Global Error Message -->
+                <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-md p-4" role="alert">
+                    <div class="flex">
+                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="ml-3 text-sm text-red-800">{{ errorMessage }}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Sidebar -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <!-- Avatar Section -->
+                            <div class="text-center">
+                                <div class="relative inline-block">
+                                    <div v-if="user.profile_picture" class="h-24 w-24 rounded-full overflow-hidden mx-auto">
+                                        <img :src="user.profile_picture" :alt="user.name" class="h-full w-full object-cover">
+                                    </div>
+                                    <div v-else class="h-24 w-24 rounded-full bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold mx-auto">
+                                        {{ userInitials }}
+                                    </div>
+                                    <button @click="changeAvatar"
+                                            class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+                                            aria-label="Change profile picture">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </button>
+                                    <!-- Hidden file input -->
+                                    <input type="file" id="profile-picture-input" @change="handleProfilePictureUpload" accept="image/*" class="hidden">
+                                </div>
+                                <h2 class="mt-4 text-xl font-semibold text-gray-900">{{ user.name }}</h2>
+                                <p class="text-sm text-gray-500">{{ user.email }}</p>
+                                <div class="mt-4 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <span class="h-2 w-2 rounded-full bg-green-400 mr-2"></span>
+                                    Active
+                                </div>
+                            </div>
+
+                            <!-- Quick Stats -->
+                            <div class="mt-6 pt-6 border-t border-gray-200 space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Member since</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ formatRelativeTime(user.created_at) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Last activity</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ lastActivityText }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Account age</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ accountAge }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Statistics -->
+                        <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Statistics</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-sm text-gray-600">Articles Bookmarked</span>
+                                        <span class="text-lg font-semibold text-indigo-600">{{ stats.bookmarked }}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-indigo-600 h-2 rounded-full" :style="`width: ${Math.min(stats.bookmarked / 50 * 100, 100)}%`"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-sm text-gray-600">Posts Created</span>
+                                        <span class="text-lg font-semibold text-green-600">{{ stats.posts }}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-600 h-2 rounded-full" :style="`width: ${Math.min(stats.posts / 30 * 100, 100)}%`"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-sm text-gray-600">Posts Published</span>
+                                        <span class="text-lg font-semibold text-blue-600">{{ stats.published }}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full" :style="`width: ${Math.min(stats.published / 30 * 100, 100)}%`"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Personal Information -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="p-6 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Update your personal details</p>
+                                    </div>
+                                    <button v-if="!editingProfile"
+                                            @click="editProfile"
+                                            class="px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <form @submit.prevent="saveProfile" class="space-y-6">
+                                    <!-- Name -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                        <input v-if="editingProfile"
+                                               v-model="profileForm.name"
+                                               type="text"
+                                               required
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <p v-else class="text-sm text-gray-900">{{ user.name }}</p>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                        <input v-if="editingProfile"
+                                               v-model="profileForm.email"
+                                               type="email"
+                                               required
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <p v-else class="text-sm text-gray-900">{{ user.email }}</p>
+                                        <p v-if="!editingProfile && !user.email_verified" class="mt-1 text-xs text-yellow-600 flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                            </svg>
+                                            Email not verified
+                                        </p>
+                                    </div>
+
+                                    <!-- Bio -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                        <textarea v-if="editingProfile"
+                                                  v-model="profileForm.bio"
+                                                  rows="3"
+                                                  placeholder="Tell us about yourself..."
+                                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                        <p v-else class="text-sm text-gray-900">{{ user.bio || 'No bio added yet' }}</p>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div v-if="editingProfile" class="flex space-x-3">
+                                        <button type="submit"
+                                                :disabled="saving"
+                                                class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                            {{ saving ? 'Saving...' : 'Save Changes' }}
+                                        </button>
+                                        <button type="button"
+                                                @click="cancelEditProfile"
+                                                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors">
+                                            Cancel
+                                        </button>
+                                    </div>
+
+                                    <!-- Success Message -->
+                                    <div v-if="successMessage" class="bg-green-50 border border-green-200 rounded-md p-3" role="alert">
+                                        <p class="text-sm text-green-800">{{ successMessage }}</p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Change Password -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="p-6 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">Password</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Update your password to keep your account secure</p>
+                                    </div>
+                                    <button v-if="!changingPassword"
+                                            @click="changingPassword = true"
+                                            class="px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+                                        Change
+                                    </button>
+                                </div>
+                            </div>
+                            <div v-if="changingPassword" class="p-6">
+                                <form @submit.prevent="changePassword" class="space-y-6">
+                                    <!-- Current Password -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                        <div class="relative">
+                                            <input v-model="passwordForm.currentPassword"
+                                                   :type="passwordForm.showCurrent ? 'text' : 'password'"
+                                                   required
+                                                   class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                            <button type="button"
+                                                    @click="passwordForm.showCurrent = !passwordForm.showCurrent"
+                                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                                    :aria-label="passwordForm.showCurrent ? 'Hide password' : 'Show password'">
+                                                <svg v-if="passwordForm.showCurrent" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                <svg v-else class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- New Password -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                        <div class="relative">
+                                            <input v-model="passwordForm.newPassword"
+                                                   :type="passwordForm.showNew ? 'text' : 'password'"
+                                                   required
+                                                   class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                            <button type="button"
+                                                    @click="passwordForm.showNew = !passwordForm.showNew"
+                                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                                    :aria-label="passwordForm.showNew ? 'Hide password' : 'Show password'">
+                                                <svg v-if="passwordForm.showNew" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                <svg v-else class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <!-- Password Strength Indicator -->
+                                        <div v-if="passwordForm.newPassword" class="mt-2">
+                                            <div class="flex items-center justify-between text-xs mb-1">
+                                                <span class="text-gray-600">Password strength</span>
+                                                <span :class="passwordStrengthText ? 'text-gray-900 font-medium' : 'text-gray-500'">{{ passwordStrengthText || 'Enter password' }}</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                                <div :class="passwordStrengthColor" :style="`width: ${passwordStrength}%`" class="h-1.5 rounded-full transition-all"></div>
+                                            </div>
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Must be at least 8 characters with uppercase, lowercase, and numbers</p>
+                                    </div>
+
+                                    <!-- Confirm New Password -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                        <div class="relative">
+                                            <input v-model="passwordForm.confirmPassword"
+                                                   :type="passwordForm.showConfirm ? 'text' : 'password'"
+                                                   required
+                                                   class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                            <button type="button"
+                                                    @click="passwordForm.showConfirm = !passwordForm.showConfirm"
+                                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                                    :aria-label="passwordForm.showConfirm ? 'Hide password' : 'Show password'">
+                                                <svg v-if="passwordForm.showConfirm" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                <svg v-else class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Error Message -->
+                                    <div v-if="passwordError" class="bg-red-50 border border-red-200 rounded-md p-3" role="alert">
+                                        <p class="text-sm text-red-800">{{ passwordError }}</p>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="flex space-x-3">
+                                        <button type="submit"
+                                                :disabled="saving"
+                                                class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                            {{ saving ? 'Updating...' : 'Update Password' }}
+                                        </button>
+                                        <button type="button"
+                                                @click="cancelChangePassword"
+                                                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- API Key Management -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="p-6 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">API Keys</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Manage your AI provider API keys</p>
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Encrypted & Secure
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <api-key-manager></api-key-manager>
+                            </div>
+                        </div>
+
+                        <!-- Setup Guides -->
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                        </svg>
+                                        Setup Guides
+                                    </h3>
+                                    <p class="mt-1 text-sm text-gray-600">Step-by-step guides to connect your social media accounts</p>
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <!-- Twitter Setup Guide -->
+                                <a href="setup-twitter.html" class="block bg-white rounded-lg border border-gray-200 hover:border-indigo-500 hover:shadow-md transition-all p-4 group">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                            </svg>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Twitter/X Setup</h4>
+                                    <p class="text-xs text-gray-500">Connect your Twitter account with one click</p>
+                                    <div class="mt-3 flex items-center text-xs text-indigo-600 font-medium">
+                                        <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        ~10 min
+                                    </div>
+                                </a>
+
+                                <!-- LinkedIn Setup Guide -->
+                                <a href="setup-linkedin.html" class="block bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all p-4 group">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                            </svg>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">LinkedIn Setup</h4>
+                                    <p class="text-xs text-gray-500">Connect your professional network</p>
+                                    <div class="mt-3 flex items-center text-xs text-blue-600 font-medium">
+                                        <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        ~10 min
+                                    </div>
+                                </a>
+
+                                <!-- Instagram/Threads Setup Guide -->
+                                <div class="block bg-white rounded-lg border border-gray-200 p-4 opacity-50 cursor-not-allowed" style="pointer-events: none;">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex gap-1">
+                                            <div class="w-10 h-10 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-lg flex items-center justify-center">
+                                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Instagram & Threads</h4>
+                                    <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 mb-1">Coming Soon</span>
+                                    <p class="text-xs text-gray-500">Setup both Meta platforms at once</p>
+                                    <div class="mt-3 flex items-center text-xs text-purple-600 font-medium">
+                                        <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        ~10 min
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OAuth Credentials Management (Admin Only) -->
+                        <div v-if="user.is_admin" class="bg-white rounded-lg shadow-sm border border-gray-200">
+                            <div class="p-6 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">Twitter API Credentials (Admin)</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Configure Twitter API credentials for centralized OAuth</p>
+                                    </div>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Encrypted & Secure
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <oauth-credentials-manager></oauth-credentials-manager>
+                            </div>
+                        </div>
+
+                        <!-- Danger Zone -->
+                        <div class="bg-white rounded-lg shadow-sm border border-red-200">
+                            <div class="p-6 border-b border-red-200">
+                                <h3 class="text-lg font-semibold text-red-900">Danger Zone</h3>
+                                <p class="mt-1 text-sm text-red-600">Irreversible actions for your account</p>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">Delete Account</h4>
+                                        <p class="text-sm text-gray-500">Permanently delete your account and all data</p>
+                                    </div>
+                                    <button @click="confirmDeleteAccount"
+                                            class="px-4 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50 font-medium transition-colors">
+                                        Delete Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Account Modal -->
+        <div v-if="showDeleteModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50" @click.self="closeDeleteModal">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-lg font-medium text-gray-900">Delete Account</h3>
+                        <p class="mt-2 text-sm text-gray-500">
+                            Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.
+                        </p>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Enter your password to confirm</label>
+                            <input v-model="deleteAccountPassword"
+                                   type="password"
+                                   placeholder="Your password"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500">
+                        </div>
+                        <div class="mt-4 flex space-x-3">
+                            <button @click="deleteAccount"
+                                    :disabled="saving"
+                                    class="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                {{ saving ? 'Deleting...' : 'Delete Account' }}
+                            </button>
+                            <button @click="closeDeleteModal"
+                                    class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the main profile script as ES6 module -->
+    <script type="module" src="profile.js"></script>
+</body>
+</html>

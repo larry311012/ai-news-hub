@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Edit API Diagnostic Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">Post Edit API Diagnostic Tool</h1>
+
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Step 1: Authentication Check</h2>
+            <div id="auth-status" class="mb-4"></div>
+            <button id="clear-auth" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 mr-2">
+                Clear Auth & Retry
+            </button>
+            <a href="auth.html" class="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Go to Login
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Step 2: API Test Results</h2>
+            <div id="api-results"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Step 3: Vue App State (if on post-edit.html)</h2>
+            <div id="vue-state"></div>
+            <button id="check-vue" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                Check Vue State
+            </button>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Console Logs</h2>
+            <div id="console-logs" class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        const POST_ID = 23;
+
+        // Logging helper
+        const logs = [];
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : '📝';
+            const logEntry = `[${timestamp}] ${prefix} ${message}`;
+            logs.push(logEntry);
+            document.getElementById('console-logs').innerHTML = logs.join('<br>');
+        }
+
+        // Step 1: Check Authentication
+        function checkAuth() {
+            const authStatus = document.getElementById('auth-status');
+            const token = localStorage.getItem('auth_token');
+            const user = localStorage.getItem('auth_user');
+
+            log('Checking authentication...');
+
+            if (!token) {
+                authStatus.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded p-4">
+                        <p class="text-red-800 font-semibold">❌ No authentication token found</p>
+                        <p class="text-red-600 text-sm mt-2">You need to log in first. Click "Go to Login" button above.</p>
+                    </div>
+                `;
+                log('Auth token NOT FOUND', 'error');
+                return false;
+            }
+
+            const tokenPreview = token.substring(0, 20) + '...';
+            authStatus.innerHTML = `
+                <div class="bg-green-50 border border-green-200 rounded p-4">
+                    <p class="text-green-800 font-semibold">✅ Authentication token found</p>
+                    <p class="text-green-600 text-sm mt-2">Token: ${tokenPreview}</p>
+                    ${user ? `<p class="text-green-600 text-sm">User: ${JSON.parse(user).email || 'Unknown'}</p>` : ''}
+                </div>
+            `;
+            log(`Auth token found: ${tokenPreview}`, 'success');
+            return true;
+        }
+
+        // Step 2: Test API
+        async function testAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            const token = localStorage.getItem('auth_token');
+
+            if (!token) {
+                resultsDiv.innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-4">
+                        <p class="text-yellow-800">Cannot test API without authentication token. Please log in first.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            resultsDiv.innerHTML = `
+                <div class="flex items-center justify-center py-8">
+                    <svg class="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="ml-3 text-gray-600">Testing API...</span>
+                </div>
+            `;
+
+            log(`Making request to /api/posts/${POST_ID}/edit`);
+
+            try {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                const apiUrl = `${API_BASE_URL}/posts/${POST_ID}/edit`;
+
+                log(`URL: ${apiUrl}`);
+
+                const startTime = Date.now();
+                const response = await axios.get(apiUrl, { timeout: 10000 });
+                const endTime = Date.now();
+
+                log(`✅ API response received in ${endTime - startTime}ms`, 'success');
+                log(`Status: ${response.status}`, 'success');
+                log(`Data keys: ${Object.keys(response.data).join(', ')}`);
+
+                const data = response.data;
+
+                resultsDiv.innerHTML = `
+                    <div class="bg-green-50 border border-green-200 rounded p-4 mb-4">
+                        <p class="text-green-800 font-semibold">✅ API Request Successful</p>
+                        <p class="text-green-600 text-sm mt-2">Response time: ${endTime - startTime}ms</p>
+                        <p class="text-green-600 text-sm">Status: ${response.status} ${response.statusText}</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">Post Data:</h3>
+                            <div class="bg-gray-50 p-3 rounded">
+                                <p><strong>ID:</strong> ${data.id}</p>
+                                <p><strong>Title:</strong> ${data.article_title || 'N/A'}</p>
+                                <p><strong>Status:</strong> ${data.status}</p>
+                                <p><strong>Twitter Content:</strong> ${data.twitter_content?.length || 0} chars</p>
+                                <p><strong>LinkedIn Content:</strong> ${data.linkedin_content?.length || 0} chars</p>
+                                <p><strong>Threads Content:</strong> ${data.threads_content?.length || 0} chars</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">Platform Statuses:</h3>
+                            <div class="bg-gray-50 p-3 rounded">
+                                ${data.platform_statuses && data.platform_statuses.length > 0 ?
+                                    data.platform_statuses.map(ps => `
+                                        <p><strong>${ps.platform}:</strong> ${ps.connected ? '✅ Connected' : '❌ Not connected'}
+                                        ${ps.username ? ` (@${ps.username})` : ''}</p>
+                                    `).join('') :
+                                    '<p class="text-gray-500">No platform status data</p>'
+                                }
+                            </div>
+                        </div>
+
+                        <details class="cursor-pointer">
+                            <summary class="font-semibold text-gray-700 mb-2">Full Response JSON</summary>
+                            <pre class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-x-auto mt-2">${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+
+            } catch (error) {
+                log(`❌ API request failed: ${error.message}`, 'error');
+
+                let errorDetails = {
+                    message: error.message,
+                    code: error.code
+                };
+
+                if (error.response) {
+                    errorDetails.status = error.response.status;
+                    errorDetails.statusText = error.response.statusText;
+                    errorDetails.data = error.response.data;
+                    log(`Response status: ${error.response.status}`, 'error');
+                    log(`Response data: ${JSON.stringify(error.response.data)}`, 'error');
+                } else if (error.request) {
+                    errorDetails.noResponse = 'No response received from server';
+                    log('No response received from server', 'error');
+                }
+
+                resultsDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded p-4">
+                        <p class="text-red-800 font-semibold">❌ API Request Failed</p>
+                        <p class="text-red-600 text-sm mt-2">${error.message}</p>
+
+                        ${error.response ? `
+                            <div class="mt-4">
+                                <p class="text-red-700 font-medium">Response Details:</p>
+                                <p class="text-red-600 text-sm">Status: ${error.response.status} ${error.response.statusText}</p>
+                                <p class="text-red-600 text-sm">Detail: ${error.response.data?.detail || 'N/A'}</p>
+                            </div>
+                        ` : ''}
+
+                        ${error.code === 'ECONNABORTED' ? `
+                            <div class="mt-4 bg-yellow-100 border border-yellow-300 rounded p-3">
+                                <p class="text-yellow-800 text-sm">⚠️ Request timed out. Server might be slow or down.</p>
+                            </div>
+                        ` : ''}
+
+                        ${error.response?.status === 401 ? `
+                            <div class="mt-4 bg-blue-100 border border-blue-300 rounded p-3">
+                                <p class="text-blue-800 text-sm">🔐 Authentication failed. Please <a href="auth.html" class="underline">log in again</a>.</p>
+                            </div>
+                        ` : ''}
+
+                        <details class="mt-4 cursor-pointer">
+                            <summary class="text-red-700 font-medium">Full Error Details</summary>
+                            <pre class="bg-gray-900 text-red-400 p-4 rounded text-sm overflow-x-auto mt-2">${JSON.stringify(errorDetails, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            }
+        }
+
+        // Step 3: Check Vue State
+        function checkVueState() {
+            const vueStateDiv = document.getElementById('vue-state');
+
+            try {
+                // Try to access Vue app instance
+                const appElement = document.querySelector('#edit-app');
+
+                if (!appElement) {
+                    vueStateDiv.innerHTML = `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded p-4 mt-4">
+                            <p class="text-yellow-800">Vue app not found. Are you on the post-edit.html page?</p>
+                            <p class="text-yellow-600 text-sm mt-2">This check only works when run on the actual post editor page.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Access Vue instance (Vue 3 way)
+                const vueInstance = appElement.__vueParentComponent?.ctx || appElement.__vue_app__?.ctx;
+
+                if (!vueInstance) {
+                    vueStateDiv.innerHTML = `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded p-4 mt-4">
+                            <p class="text-yellow-800">Could not access Vue instance</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                log('Vue instance found');
+                log(`Loading: ${vueInstance.loading}`);
+                log(`Error: ${vueInstance.error || 'none'}`);
+                log(`Post ID: ${vueInstance.postId}`);
+
+                vueStateDiv.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded p-4 mt-4">
+                        <h4 class="font-semibold text-blue-900 mb-2">Vue App State:</h4>
+                        <div class="space-y-1 text-sm">
+                            <p><strong>Loading:</strong> ${vueInstance.loading ? '🔄 TRUE' : '✅ FALSE'}</p>
+                            <p><strong>Error:</strong> ${vueInstance.error || '✅ None'}</p>
+                            <p><strong>Post ID:</strong> ${vueInstance.postId || 'Not set'}</p>
+                            <p><strong>Post Data:</strong> ${Object.keys(vueInstance.post || {}).length > 0 ? '✅ Loaded' : '❌ Empty'}</p>
+                            <p><strong>Selected Platforms:</strong> ${vueInstance.selectedPlatforms?.join(', ') || 'None'}</p>
+                        </div>
+
+                        <details class="mt-4 cursor-pointer">
+                            <summary class="font-medium text-blue-900">Full State</summary>
+                            <pre class="bg-gray-900 text-blue-400 p-4 rounded text-sm overflow-x-auto mt-2">${JSON.stringify({
+                                loading: vueInstance.loading,
+                                error: vueInstance.error,
+                                postId: vueInstance.postId,
+                                post: vueInstance.post,
+                                selectedPlatforms: vueInstance.selectedPlatforms,
+                                platformConnections: vueInstance.platformConnections
+                            }, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+
+            } catch (error) {
+                log(`Error checking Vue state: ${error.message}`, 'error');
+                vueStateDiv.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded p-4 mt-4">
+                        <p class="text-red-800">Error accessing Vue state: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('clear-auth').addEventListener('click', () => {
+            log('Clearing authentication...');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+            log('Authentication cleared. Please log in again.', 'error');
+            setTimeout(() => window.location.reload(), 500);
+        });
+
+        document.getElementById('check-vue').addEventListener('click', checkVueState);
+
+        // Auto-run on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Diagnostic tool started');
+            checkAuth();
+            testAPI();
+        });
+    </script>
+</body>
+</html>

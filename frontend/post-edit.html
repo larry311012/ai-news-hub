@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post - AI News Hub</title>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .slide-up {
+            animation: slideUp 0.4s ease-out;
+        }
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .tab-underline {
+            position: relative;
+        }
+        .tab-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: currentColor;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .tab-underline.active::after {
+            transform: scaleX(1);
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+        .image-preview {
+            max-width: 600px;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="edit-app">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <button @click="goBack" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mr-6">
+                            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back
+                        </button>
+                        <h1 class="text-xl font-bold text-gray-900">Edit & Publish Post</h1>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button @click="saveDraft"
+                                :disabled="saving || !hasUnsavedChanges"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            {{ saving ? 'Saving...' : 'Save Draft' }}
+                        </button>
+                        <button @click="openPublishModal"
+                                :disabled="!canPublish"
+                                :title="publishButtonTooltip"
+                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            Publish Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Loading State -->
+            <div v-if="loading" class="flex items-center justify-center py-20">
+                <div class="text-center">
+                    <svg class="animate-spin h-12 w-12 text-indigo-600 mx-auto" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-4 text-gray-600">Loading post...</p>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-red-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h3 class="text-lg font-semibold text-red-900">Error Loading Post</h3>
+                        <p class="text-sm text-red-700 mt-1" v-text="error"></p>
+                        <button @click="goBack" class="mt-4 px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200">
+                            Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Editor -->
+            <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column: Editor -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Article Reference -->
+                    <div v-if="post.article_title" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 slide-up">
+                        <h3 class="text-sm font-medium text-gray-500 mb-1">Source Article</h3>
+                        <p class="text-base font-semibold text-gray-900" v-text="post.article_title"></p>
+                    </div>
+
+                    <!-- Platform Tabs with Validation Indicators -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 slide-up">
+                        <div class="border-b border-gray-200 px-6 pt-4">
+                            <nav class="flex space-x-8" role="tablist">
+                                <button v-for="platform in platforms"
+                                        :key="platform.id"
+                                        @click="selectedPlatform = platform.id"
+                                        :class="[
+                                            selectedPlatform === platform.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                                            getPlatformValidationState(platform.id) === 'error' && selectedPlatform !== platform.id ? 'border-red-300' : ''
+                                        ]"
+                                        class="relative flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors focus:outline-none"
+                                        :aria-selected="selectedPlatform === platform.id"
+                                        role="tab">
+                                    <component :is="'span'" v-html="platform.icon" class="w-5 h-5 mr-2"></component>
+                                    <span>{{ platform.name }}</span>
+
+                                    <!-- Validation Badge -->
+                                    <span v-if="getPlatformValidationState(platform.id) === 'error'"
+                                          class="ml-2 inline-flex items-center"
+                                          :class="selectedPlatform === platform.id ? '' : 'pulse-animation'"
+                                          v-html="getPlatformValidationIcon(platform.id)">
+                                    </span>
+                                    <span v-else-if="getPlatformValidationState(platform.id) === 'warning'"
+                                          class="ml-2 inline-flex items-center"
+                                          v-html="getPlatformValidationIcon(platform.id)">
+                                    </span>
+                                    <span v-else-if="getPlatformValidationState(platform.id) === 'valid'"
+                                          class="ml-2 inline-flex items-center"
+                                          v-html="getPlatformValidationIcon(platform.id)">
+                                    </span>
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Editor Content -->
+                        <div class="p-6">
+                            <!-- Text-based platforms (Twitter, LinkedIn, Threads) -->
+                            <div v-for="platform in platforms.filter(p => p.id !== 'instagram')"
+                                 :key="platform.id"
+                                 v-show="selectedPlatform === platform.id"
+                                 class="fade-in">
+
+                                <!-- Inline Validation Alert -->
+                                <div v-if="getPlatformValidationState(platform.id) === 'error'"
+                                     class="mb-4 p-4 bg-red-50 border-l-4 border-red-600 rounded-r-lg">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-semibold text-red-900">Content Too Long</h4>
+                                            <p class="text-sm text-red-700 mt-1">{{ validatePlatform(platform.id).errorMessage }}</p>
+                                            <p class="text-xs text-red-600 mt-2">Please reduce your content to publish to {{ platform.name }}.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-else-if="getPlatformValidationState(platform.id) === 'warning'"
+                                     class="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-yellow-900">Approaching character limit</p>
+                                            <p class="text-xs text-yellow-700 mt-1">{{ validatePlatform(platform.id).warningMessage }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Textarea -->
+                                <div class="mb-4">
+                                    <label :for="`editor-${platform.id}`" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Content for {{ platform.name }}
+                                    </label>
+                                    <textarea
+                                        :id="`editor-${platform.id}`"
+                                        v-model="editableContent[platform.id]"
+                                        @input="handleContentChange"
+                                        :maxlength="platform.maxLength + 100"
+                                        rows="10"
+                                        :class="[
+                                            'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent font-mono text-sm resize-none',
+                                            getPlatformValidationState(platform.id) === 'error' ? 'border-red-300 focus:ring-red-500 bg-red-50' :
+                                            getPlatformValidationState(platform.id) === 'warning' ? 'border-yellow-300 focus:ring-yellow-500 bg-yellow-50' :
+                                            'border-gray-300 focus:ring-indigo-500'
+                                        ]"
+                                        :placeholder="`Write your ${platform.name} post here...`"
+                                    ></textarea>
+
+                                    <!-- Character Counter with Visual Indicators -->
+                                    <div class="flex justify-between items-center mt-2">
+                                        <div class="flex items-center space-x-2">
+                                            <!-- Visual Character Counter -->
+                                            <div class="text-sm flex items-center space-x-1" :class="getContentValidationClass(platform.id)">
+                                                <span v-if="getPlatformValidationState(platform.id) === 'error'" class="font-semibold">
+                                                    {{ editableContent[platform.id]?.length || 0 }} / {{ platform.maxLength }}
+                                                </span>
+                                                <span v-else-if="getPlatformValidationState(platform.id) === 'warning'" class="font-semibold">
+                                                    {{ editableContent[platform.id]?.length || 0 }} / {{ platform.maxLength }}
+                                                </span>
+                                                <span v-else>
+                                                    {{ editableContent[platform.id]?.length || 0 }} / {{ platform.maxLength }}
+                                                </span>
+
+                                                <!-- Status Icon -->
+                                                <span v-if="getPlatformValidationState(platform.id) === 'error'">
+
+                                                </span>
+                                                <span v-else-if="getPlatformValidationState(platform.id) === 'warning'">
+
+                                                </span>
+                                                <span v-else-if="getPlatformValidationState(platform.id) === 'valid'">
+
+                                                </span>
+                                            </div>
+
+                                            <!-- Progress Bar -->
+                                            <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                <div class="h-full transition-all duration-300"
+                                                     :class="{
+                                                         'bg-red-600': getPlatformValidationState(platform.id) === 'error',
+                                                         'bg-yellow-500': getPlatformValidationState(platform.id) === 'warning',
+                                                         'bg-green-600': getPlatformValidationState(platform.id) === 'valid',
+                                                         'bg-gray-400': getPlatformValidationState(platform.id) === 'empty'
+                                                     }"
+                                                     :style="{ width: Math.min((editableContent[platform.id]?.length || 0) / platform.maxLength * 100, 100) + '%' }">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center space-x-2">
+                                            <button @click="formatContent(platform.id, 'bold')"
+                                                    class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                                                    title="Bold">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"/>
+                                                </svg>
+                                            </button>
+                                            <button @click="addHashtags(platform.id)"
+                                                    class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                                                    title="Add hashtags">
+                                                #
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Preview -->
+                                <div class="mt-6">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Preview</h4>
+                                    <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                        <div class="bg-white rounded-lg shadow-sm p-4 max-w-lg">
+                                            <div class="flex items-center mb-3">
+                                                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                                    {{ userInitials }}
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-semibold text-gray-900">{{ userName }}</p>
+                                                    <p class="text-xs text-gray-500">Just now</p>
+                                                </div>
+                                            </div>
+                                            <p class="text-sm text-gray-900 whitespace-pre-wrap break-words" v-text="editableContent[platform.id] || 'Your post preview will appear here...'"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Instagram Tab Content -->
+                            <div v-if="selectedPlatform === 'instagram'" class="fade-in">
+                                <!-- Instagram Image Section -->
+                                <div class="mb-6">
+                                    <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-pink-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+                                        </svg>
+                                        Instagram Image
+                                    </h3>
+
+                                    <!-- Error Alert -->
+                                    <div v-if="imageGenerationError" class="mb-4 p-4 bg-red-50 border-l-4 border-red-600 rounded-r-lg">
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <div class="flex-1">
+                                                <h4 class="text-sm font-semibold text-red-900">Image Generation Failed</h4>
+                                                <p class="text-sm text-red-700 mt-1" v-text="imageGenerationError"></p>
+                                            </div>
+                                            <button @click="imageGenerationError = null" class="text-red-400 hover:text-red-600">
+                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image Preview or Generate Button -->
+                                    <div class="image-preview mx-auto">
+                                        <!-- Loading State with Progress -->
+                                        <div v-if="instagramImageLoading" class="w-full aspect-square bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center">
+                                            <div class="text-center px-8">
+                                                <svg class="animate-spin h-12 w-12 text-indigo-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+
+                                                <!-- Progress Bar -->
+                                                <div class="w-64 h-2 bg-gray-200 rounded-full mx-auto mb-3 overflow-hidden">
+                                                    <div class="h-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-full transition-all duration-300"
+                                                         :style="{ width: imageGenerationProgress + '%' }">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Status Text -->
+                                                <p class="text-sm font-medium text-gray-900 mb-1">{{ imageGenerationStep || 'Generating image...' }}</p>
+                                                <p class="text-xs text-gray-500">{{ imageGenerationProgress }}% complete</p>
+                                                <p class="text-xs text-gray-400 mt-2">This may take 20-40 seconds</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Image Preview -->
+                                        <div v-else-if="instagramImage" class="relative group">
+                                            <img :src="instagramImage"
+                                                 alt="Instagram post"
+                                                 class="w-full rounded-lg shadow-md border border-gray-200"
+                                                 @load="imageLoadSuccess"
+                                                 @error="imageLoadError">
+
+                                            <!-- Image Actions Overlay -->
+                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                                <div class="flex space-x-2">
+                                                    <button @click="regenerateInstagramImage"
+                                                            class="px-3 py-2 bg-white text-gray-800 rounded-lg shadow-lg hover:bg-gray-100 transition-colors text-sm font-medium flex items-center">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                        </svg>
+                                                        Regenerate
+                                                    </button>
+                                                    <button @click="downloadImage"
+                                                            class="px-3 py-2 bg-white text-gray-800 rounded-lg shadow-lg hover:bg-gray-100 transition-colors text-sm font-medium flex items-center">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                        </svg>
+                                                        Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Generate Button -->
+                                        <div v-else class="w-full aspect-square bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                            <div class="text-center p-8">
+                                                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                                <h4 class="text-lg font-semibold text-gray-900 mb-2">No Image Generated</h4>
+                                                <p class="text-sm text-gray-600 mb-4">Generate an AI-powered image for your Instagram post</p>
+                                                <button @click="generateInstagramImage"
+                                                        class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg shadow-md hover:from-purple-700 hover:to-pink-700 transition-all font-medium">
+                                                    Generate Image
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image Actions (when image exists) -->
+                                    <div v-if="instagramImage && !instagramImageLoading" class="flex justify-center space-x-3 mt-4">
+                                        <button @click="regenerateInstagramImage"
+                                                :disabled="instagramImageLoading"
+                                                class="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-300 rounded-md hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                            Regenerate
+                                        </button>
+                                        <label class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-pointer flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                            </svg>
+                                            Upload Image
+                                            <input type="file"
+                                                   accept="image/*"
+                                                   @change="uploadImage"
+                                                   class="hidden">
+                                        </label>
+                                        <button @click="downloadImage"
+                                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Instagram Caption Section -->
+                                <div class="mt-8">
+                                    <h3 class="text-base font-semibold text-gray-900 mb-4">Caption</h3>
+
+                                    <textarea
+                                        id="instagram-caption"
+                                        v-model="instagramCaption"
+                                        @input="handleInstagramCaptionChange"
+                                        maxlength="2200"
+                                        rows="8"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm resize-none"
+                                        placeholder="Write your Instagram caption... (optional but recommended)
+
+Tip: Add emojis and hashtags for better engagement!"
+                                    ></textarea>
+
+                                    <!-- Character Counter -->
+                                    <div class="flex justify-between items-center mt-2">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-sm" :class="instagramCaption.length > 2000 ? 'text-red-600 font-semibold' : 'text-gray-600'">
+                                                {{ instagramCaption.length }} / 2200
+                                            </span>
+                                            <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                <div class="h-full transition-all duration-300"
+                                                     :class="instagramCaption.length > 2000 ? 'bg-red-600' : instagramCaption.length > 1800 ? 'bg-yellow-500' : 'bg-green-600'"
+                                                     :style="{ width: Math.min((instagramCaption.length / 2200) * 100, 100) + '%' }">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button @click="addInstagramHashtags"
+                                                class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                                            Add Hashtags
+                                        </button>
+                                    </div>
+
+                                    <!-- Caption Preview -->
+                                    <div class="mt-6">
+                                        <h4 class="text-sm font-medium text-gray-700 mb-3">Preview</h4>
+                                        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                            <div class="bg-white rounded-lg shadow-sm max-w-lg">
+                                                <!-- Image Preview -->
+                                                <div v-if="instagramImage" class="aspect-square bg-gray-100 overflow-hidden">
+                                                    <img :src="instagramImage" alt="Instagram preview" class="w-full h-full object-cover">
+                                                </div>
+                                                <div v-else class="aspect-square bg-gray-200 flex items-center justify-center">
+                                                    <p class="text-gray-500 text-sm">No image</p>
+                                                </div>
+
+                                                <!-- Caption Preview -->
+                                                <div class="p-4">
+                                                    <div class="flex items-center mb-2">
+                                                        <div class="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-xs">
+                                                            {{ userInitials }}
+                                                        </div>
+                                                        <p class="ml-2 text-sm font-semibold text-gray-900">{{ userName }}</p>
+                                                    </div>
+                                                    <p class="text-sm text-gray-900 whitespace-pre-wrap break-words" v-text="instagramCaption || 'Your caption will appear here...'"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Platform Status & Actions -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Platform Connection Status -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 slide-up" style="animation-delay: 0.1s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Platform Status</h3>
+                            <!-- NEW: Refresh Button -->
+                            <button @click="refreshConnectionStatus"
+                                    :disabled="refreshingConnections"
+                                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    title="Refresh connection status">
+                                <svg class="w-3 h-3 mr-1" :class="{ 'animate-spin': refreshingConnections }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                {{ refreshingConnections ? 'Refreshing...' : 'Refresh' }}
+                            </button>
+                        </div>
+                        <div class="space-y-3">
+                            <div v-for="platform in platforms" :key="platform.id" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox"
+                                           :id="`platform-${platform.id}`"
+                                           v-model="selectedPlatforms"
+                                           :value="platform.id"
+                                           :disabled="!platformConnections[platform.id].connected || (platform.id === 'instagram' && !instagramImage)"
+                                           :title="!platformConnections[platform.id].connected ? 'Connect ' + platform.name + ' first' : (platform.id === 'instagram' && !instagramImage ? 'Generate an image first' : 'Select to publish to ' + platform.name)"
+                                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label :for="`platform-${platform.id}`" class="flex items-center space-x-2 cursor-pointer">
+                                        <component :is="'span'" v-html="platform.icon" class="w-5 h-5"></component>
+                                        <span class="text-sm font-medium text-gray-900">{{ platform.name }}</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <!-- Connection Status -->
+                                    <span v-if="platformConnections[platform.id].connected"
+                                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                          :title="platformConnections[platform.id].username ? 'Connected as @' + platformConnections[platform.id].username : 'Connected'">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Connected
+                                    </span>
+                                    <span v-else-if="platformConnections[platform.id].status === 'checking'"
+                                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                        Checking...
+                                    </span>
+                                    <button v-else
+                                            @click="connectPlatform(platform.id)"
+                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition-colors"
+                                            :title="'Click to connect your ' + platform.name + ' account'">
+                                        Connect
+                                    </button>
+
+                                    <!-- Instagram-specific: Show image required badge -->
+                                    <span v-if="platform.id === 'instagram' && platformConnections[platform.id].connected && !instagramImage"
+                                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+                                          title="Image required for Instagram">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </span>
+
+                                    <!-- Validation Status Badge -->
+                                    <span v-if="selectedPlatforms.includes(platform.id) && getPlatformValidationState(platform.id) === 'error'"
+                                          v-html="getPlatformValidationIcon(platform.id)"
+                                          class="pulse-animation">
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Platform Username Display -->
+                        <div v-if="hasConnectedPlatforms" class="mt-4 pt-4 border-t border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Connected Accounts</h4>
+                            <div class="space-y-2">
+                                <template v-for="platform in platforms" :key="`user-${platform.id}`">
+                                    <div v-if="platformConnections[platform.id] && platformConnections[platform.id].connected && platformConnections[platform.id].username"
+                                         class="flex items-center justify-between text-xs">
+                                        <span class="text-gray-600">{{ platform.name }}</span>
+                                        <span class="font-medium text-gray-900">@{{ platformConnections[platform.id].username }}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Publishing Options -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 slide-up" style="animation-delay: 0.2s;">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Publishing Options</h3>
+
+                        <!-- Schedule Option (Future Feature) -->
+                        <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="schedulePost" disabled class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm font-medium text-gray-500">Schedule for later</span>
+                                </label>
+                                <span class="text-xs text-gray-400 bg-gray-200 px-2 py-0.5 rounded">Soon</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Schedule posts for optimal engagement times (coming soon)</p>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">Selected Platforms</span>
+                                <span class="font-semibold text-gray-900">{{ selectedPlatforms.length }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">Draft Status</span>
+                                <span :class="hasUnsavedChanges ? 'text-yellow-600' : 'text-green-600'" class="font-semibold">
+                                    {{ hasUnsavedChanges ? 'Unsaved' : 'Saved' }}
+                                </span>
+                            </div>
+                            <!-- Validation Status -->
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">Validation Status</span>
+                                <span :class="getAllValidationErrors().length > 0 ? 'text-red-600' : 'text-green-600'" class="font-semibold flex items-center">
+                                    <span v-if="getAllValidationErrors().length > 0">
+                                        {{ getAllValidationErrors().length }} Error{{ getAllValidationErrors().length !== 1 ? 's' : '' }}
+                                    </span>
+                                    <span v-else class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        All Valid
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg shadow-sm border border-indigo-200 p-6 slide-up" style="animation-delay: 0.3s;">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                        <div class="space-y-2">
+                            <button @click="regenerateContent"
+                                    :disabled="regenerating"
+                                    class="w-full px-4 py-2 text-sm font-medium text-indigo-600 bg-white border border-indigo-300 rounded-md hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                {{ regenerating ? 'Regenerating...' : 'Regenerate Content' }}
+                            </button>
+                            <button @click="copyToClipboard"
+                                    class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                                Copy Current Post
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Publish Confirmation Modal -->
+        <div v-if="showPublishModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 fade-in" @click.self="closePublishModal">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 slide-up">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Confirm Publishing</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        You are about to publish to {{ selectedPlatforms.length }} platform(s):
+                    </p>
+                    <div class="space-y-2 mb-6">
+                        <div v-for="platformId in selectedPlatforms"
+                             :key="`confirm-${platformId}`"
+                             class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="text-sm font-medium text-gray-900">{{ getPlatformName(platformId) }}</span>
+                            <span class="text-xs text-gray-500">
+                                {{ platformId === 'instagram' ? 'Image + Caption' : `${editableContent[platformId]?.length || 0} chars` }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-6">
+                        <p class="text-xs text-yellow-800">
+                            This action cannot be undone. Your posts will be published immediately.
+                        </p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button @click="publishPosts"
+                                :disabled="publishing"
+                                class="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            {{ publishing ? 'Publishing...' : 'Confirm & Publish' }}
+                        </button>
+                        <button @click="closePublishModal"
+                                :disabled="publishing"
+                                class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Publishing Progress Modal -->
+        <div v-if="showPublishingModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 fade-in">
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 slide-up">
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                            <svg class="w-8 h-8 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Publishing Posts...</h3>
+                        <p class="text-sm text-gray-600 mt-2">Please wait while we publish to your selected platforms</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div v-for="platformId in selectedPlatforms"
+                             :key="`publish-${platformId}`"
+                             class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="text-sm font-medium text-gray-900">{{ getPlatformName(platformId) }}</span>
+                            <span v-if="publishingStatus[platformId] === 'publishing'"
+                                  class="inline-flex items-center text-xs text-gray-600">
+                                <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Publishing...
+                            </span>
+                            <span v-else-if="publishingStatus[platformId] === 'success'"
+                                  class="inline-flex items-center text-xs text-green-600 font-medium">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Published
+                            </span>
+                            <span v-else-if="publishingStatus[platformId] === 'error'"
+                                  class="inline-flex items-center text-xs text-red-600 font-medium">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                                Failed
+                            </span>
+                            <span v-else class="inline-flex items-center text-xs text-gray-400">
+                                Waiting...
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div v-if="showSuccessModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 fade-in" @click.self="closeSuccessModal">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 slide-up">
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Successfully Published!</h3>
+                        <p class="text-sm text-gray-600">
+                            Your posts have been published to {{ publishedCount }} platform(s)
+                        </p>
+                    </div>
+
+                    <!-- Published Links -->
+                    <div v-if="publishedLinks.length > 0" class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">View your posts:</h4>
+                        <div class="space-y-2">
+                            <a v-for="link in publishedLinks"
+                               :key="link.platform"
+                               :href="link.url"
+                               target="_blank"
+                               class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <span class="text-sm font-medium text-gray-900">{{ link.platform }}</span>
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button @click="viewHistory"
+                                class="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+                            View History
+                        </button>
+                        <button @click="closeSuccessModal"
+                                class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unsaved Changes Warning -->
+        <div v-if="showUnsavedWarning" class="fixed bottom-4 right-4 bg-yellow-50 border border-yellow-200 rounded-lg shadow-lg p-4 max-w-sm slide-up z-40">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-yellow-900">You have unsaved changes</p>
+                    <p class="text-xs text-yellow-700 mt-1">Don't forget to save your draft before leaving</p>
+                </div>
+                <button @click="showUnsavedWarning = false" class="ml-3 text-yellow-600 hover:text-yellow-800">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cache-busting parameter forces fresh load of JavaScript -->
+    <script type="module" src="post-edit.js"></script>
+</body>
+</html>

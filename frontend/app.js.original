@@ -1,0 +1,838 @@
+// Wait for Vue.js to be available with retry mechanism
+(function() {
+    'use strict';
+
+    console.log('[App] Script loaded');
+
+    let retryCount = 0;
+    const maxRetries = 10;
+    const retryDelay = 200; // milliseconds
+
+    function initApp() {
+        // Check if Vue is available
+        if (typeof Vue === 'undefined') {
+            retryCount++;
+            if (retryCount < maxRetries) {
+                console.log(`[App] Waiting for Vue.js... (attempt ${retryCount}/${maxRetries})`);
+                setTimeout(initApp, retryDelay);
+                return;
+            }
+            console.error('[App] ERROR: Vue.js not loaded after retries! Check CDN connection.');
+            document.body.innerHTML = '<div style="background: #fee; border: 2px solid red; padding: 20px; margin: 20px; font-family: sans-serif;">' +
+                '<h1 style="color: red;">Vue.js Failed to Load</h1>' +
+                '<p>The Vue.js CDN failed to load. Please check:</p>' +
+                '<ul>' +
+                '<li>Your internet connection</li>' +
+                '<li>That unpkg.com is accessible</li>' +
+                '<li>Browser console for errors</li>' +
+                '</ul>' +
+                '</div>';
+            return;
+        }
+
+        console.log('[App] Vue.js is available');
+
+        // Check if Axios is available
+        if (typeof axios === 'undefined') {
+            console.error('[App] ERROR: Axios not loaded! Check CDN connection.');
+            document.body.innerHTML = '<div style="background: #fee; border: 2px solid red; padding: 20px; margin: 20px; font-family: sans-serif;">' +
+                '<h1 style="color: red;">Axios Failed to Load</h1>' +
+                '<p>The Axios CDN failed to load. Please check your internet connection.</p>' +
+                '</div>';
+            return;
+        }
+
+        console.log('[App] Axios is available');
+
+        // Continue with app initialization
+        startVueApp();
+    }
+
+    function startVueApp() {
+
+    const { createApp } = Vue;
+    const API_BASE_URL = 'http://localhost:8000/api';
+
+    // Axios request interceptor to add auth token
+    axios.interceptors.request.use(
+        config => {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+            return config;
+        },
+        error => {
+            return Promise.reject(error);
+        }
+    );
+
+    // Axios response interceptor for error handling and auth
+    axios.interceptors.response.use(
+        response => response,
+        async error => {
+            const originalRequest = error.config;
+
+            // Handle 401 Unauthorized - but don't auto-redirect if guest browsing
+            if (error.response?.status === 401) {
+                // Clear auth data
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('auth_user');
+
+                // Only redirect for protected actions
+                // Guest browsing should stay on page
+
+                return Promise.reject(error);
+            }
+
+            // Handle network errors
+            if (!error.response) {
+                console.error('Network error:', error.message);
+                throw new Error('Network error. Please check if the backend is running at http://localhost:8000');
+            }
+
+            // Handle 307 redirects by retrying with trailing slash
+            if (error.response.status === 307 && !originalRequest._retry) {
+                originalRequest._retry = true;
+                const redirectUrl = error.response.headers.location;
+                if (redirectUrl) {
+                    originalRequest.url = redirectUrl;
+                    return axios(originalRequest);
+                }
+            }
+
+            // Return detailed error message
+            const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message;
+            error.userMessage = errorMessage;
+            throw error;
+        }
+    );
+
+    console.log('[App] Creating Vue application');
+
+    const app = createApp({
+        data() {
+            return {
+                currentView: 'feed',
+                loading: false,
+                articles: [],
+                posts: [],
+                stats: null,
+                selectedArticles: [],
+                filters: {
+                    search: '',
+                    category: '',
+                    source: '',
+                    bookmarked: null
+                },
+                generatedContent: null,
+                editableContent: {
+                    twitter: '',
+                    linkedin: '',
+                    threads: ''
+                },
+                selectedPlatform: 'twitter',
+                settings: {
+                    aiProvider: 'openai',
+                    apiKey: ''
+                },
+                // Authentication state
+                currentUser: null,
+                showUserMenu: false,
+                isAuthenticated: false,
+                // Auth prompt modal
+                showAuthPrompt: false,
+                authPromptContext: null, // Will store article info when prompting
+                // Pending action state
+                pendingAction: null, // Will store action to execute after auth
+
+                // Loading screen state
+                showGeneratingScreen: false,
+                platformStatus: {
+                    linkedin: 'pending',  // pending, loading, complete
+                    twitter: 'pending',
+                    threads: 'pending'
+                },
+                generationStatus: {
+                    linkedin: 'Waiting to start...',
+                    twitter: 'Waiting to start...',
+                    threads: 'Waiting to start...'
+                },
+                generationError: null,
+                showTimeoutWarning: false,
+                generationStartTime: null,
+                timeoutWarningTimer: null,
+                generationProgressMessage: 'Initializing AI content generation...'
+            };
+        },
+        computed: {
+            uniqueSources() {
+                return [...new Set(this.articles.map(a => a.source))].sort();
+            },
+
+            articlesByCategory() {
+                // Group articles by category for better organization
+                const grouped = {};
+                this.articles.forEach(article => {
+                    if (!grouped[article.category]) {
+                        grouped[article.category] = [];
+                    }
+                    grouped[article.category].push(article);
+                });
+                return grouped;
+            },
+
+            displayArticles() {
+                // If no category filter, return articles grouped by category (max 6 per category)
+                // Otherwise return flat list
+                if (!this.filters.category) {
+                    const limited = {};
+                    Object.keys(this.articlesByCategory).forEach(category => {
+                        limited[category] = this.articlesByCategory[category].slice(0, 6);
+                    });
+                    return limited;
+                }
+                return { [this.filters.category]: this.articles };
+            },
+
+            shouldShowCategoryHeaders() {
+                // Show category headers when viewing all categories
+                return !this.filters.category && Object.keys(this.articlesByCategory).length > 1;
+            },
+
+            filteredStats() {
+                // Calculate stats based on currently displayed articles
+                if (!this.articles || this.articles.length === 0) {
+                    return {
+                        total: 0,
+                        bookmarked: 0,
+                        sources: 0
+                    };
+                }
+
+                const bookmarkedCount = this.articles.filter(a => a.bookmarked).length;
+                const uniqueSources = [...new Set(this.articles.map(a => a.source))];
+
+                return {
+                    total: this.articles.length,
+                    bookmarked: bookmarkedCount,
+                    sources: uniqueSources.length
+                };
+            }
+        },
+        async mounted() {
+            console.log('[App] Vue component mounted');
+
+            // Check authentication but don't require it for browsing
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                // Verify token is valid and load user data
+                await this.verifyAuth();
+            } else {
+                // Guest mode - no authentication required
+                this.isAuthenticated = false;
+                console.log('[App] Browsing as guest');
+            }
+
+            // Load app data (articles are public)
+            this.loadArticles();
+            this.loadStats();
+
+            // Only load user-specific data if authenticated
+            if (this.isAuthenticated) {
+                this.loadPosts();
+                this.loadSettings();
+            }
+
+            // Close user menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (this.showUserMenu && !e.target.closest('.user-menu-container')) {
+                    this.showUserMenu = false;
+                }
+            });
+
+            // Check for return from auth with pending action
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnAction = urlParams.get('action');
+            if (returnAction === 'generate-post' && this.isAuthenticated) {
+                // User just authenticated to generate posts
+                const articleIds = urlParams.get('articles');
+                if (articleIds) {
+                    this.selectedArticles = articleIds.split(',').map(id => parseInt(id));
+                    // Just try to generate - backend will handle API key checking
+                    await this.generatePosts();
+                }
+                // Clean up URL
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+
+            console.log('[App] Initialization complete');
+        },
+        methods: {
+            async verifyAuth() {
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/auth/me`);
+                    this.currentUser = response.data;
+                    this.isAuthenticated = true;
+                    console.log('[App] User authenticated:', this.currentUser.email);
+                } catch (error) {
+                    console.error('[App] Auth verification failed:', error);
+                    // Token invalid or expired
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('auth_user');
+                    this.isAuthenticated = false;
+                    this.currentUser = null;
+                }
+            },
+
+            async logout() {
+                if (!confirm('Are you sure you want to logout?')) {
+                    return;
+                }
+
+                try {
+                    // Call backend logout endpoint
+                    await axios.post(`${API_BASE_URL}/auth/logout`);
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Continue with logout even if API call fails
+                } finally {
+                    // Clear local storage
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('auth_user');
+
+                    // Reset state
+                    this.isAuthenticated = false;
+                    this.currentUser = null;
+                    this.posts = [];
+                    this.generatedContent = null;
+                    this.selectedArticles = [];
+
+                    // Reload page to reset to guest state
+                    window.location.reload();
+                }
+            },
+
+            getUserInitials(name) {
+                if (!name) return '?';
+                return name.split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .substring(0, 2);
+            },
+
+            toggleUserMenu() {
+                this.showUserMenu = !this.showUserMenu;
+            },
+
+            navigateToAuth(mode = 'login') {
+                // Navigate to auth page
+                window.location.href = `auth.html?view=${mode}`;
+            },
+
+            async loadArticles() {
+                try {
+                    const params = new URLSearchParams();
+                    if (this.filters.search) params.append('search', this.filters.search);
+                    if (this.filters.category) params.append('category', this.filters.category);
+                    if (this.filters.source) params.append('source', this.filters.source);
+
+                    // Only filter by bookmarked if authenticated
+                    if (this.isAuthenticated && this.filters.bookmarked !== null) {
+                        params.append('bookmarked', this.filters.bookmarked);
+                    }
+
+                    // Increase limit to show diverse articles from all categories
+                    // If filtering by specific category, use smaller limit
+                    const limit = this.filters.category ? 100 : 500;
+                    params.append('limit', limit);
+
+                    const queryString = params.toString();
+                    const url = `${API_BASE_URL}/articles?${queryString}`;
+
+                    const response = await axios.get(url);
+                    this.articles = response.data;
+                } catch (error) {
+                    console.error('Error loading articles:', error);
+                    const message = error.userMessage || 'Failed to load articles. Please check if the backend is running.';
+                    this.showError(message);
+                }
+            },
+
+            async fetchArticles() {
+                // Require authentication to fetch new articles
+                if (!this.requireAuth('fetch new articles')) {
+                    return;
+                }
+
+                this.loading = true;
+                try {
+                    const response = await axios.post(`${API_BASE_URL}/articles/fetch`, {
+                        force_refresh: false
+                    });
+
+                    const newArticles = response.data.new_articles || 0;
+                    const totalFetched = response.data.total_fetched || 0;
+
+                    this.showSuccess(`Fetched ${totalFetched} articles (${newArticles} new)!`);
+                    await this.loadArticles();
+                    await this.loadStats();
+                } catch (error) {
+                    console.error('Error fetching articles:', error);
+                    const message = error.userMessage || 'Failed to fetch articles. Make sure the backend is running.';
+                    this.showError(message);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async loadStats() {
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/articles/stats/summary`);
+                    this.stats = response.data;
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                    // Don't show error to user for stats - it's not critical
+                }
+            },
+
+            async loadPosts() {
+                if (!this.isAuthenticated) return;
+
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/posts`);
+                    this.posts = response.data;
+                } catch (error) {
+                    console.error('Error loading posts:', error);
+                    // Don't show error to user for posts - it's not critical
+                }
+            },
+
+            async loadSettings() {
+                if (!this.isAuthenticated) return;
+
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/settings`);
+                    const settings = response.data;
+
+                    // Load settings from backend
+                    settings.forEach(setting => {
+                        if (setting.key === 'ai_provider') {
+                            this.settings.aiProvider = setting.value;
+                        } else if (setting.key === 'api_key') {
+                            this.settings.apiKey = setting.value;
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error loading settings:', error);
+                    // Don't show error to user for settings - use defaults
+                }
+            },
+
+            async saveSettings() {
+                if (!this.requireAuth('save settings')) {
+                    return;
+                }
+
+                try {
+                    // Save AI provider
+                    await axios.post(`${API_BASE_URL}/settings`, {
+                        key: 'ai_provider',
+                        value: this.settings.aiProvider,
+                        encrypted: false
+                    });
+
+                    // Save API key (encrypted)
+                    if (this.settings.apiKey) {
+                        await axios.post(`${API_BASE_URL}/settings`, {
+                            key: 'api_key',
+                            value: this.settings.apiKey,
+                            encrypted: true
+                        });
+                    }
+
+                    this.showSuccess('Settings saved successfully!');
+                } catch (error) {
+                    console.error('Error saving settings:', error);
+                    const message = error.userMessage || 'Failed to save settings';
+                    this.showError(message);
+                }
+            },
+
+            async toggleBookmark(articleId) {
+                // Require authentication to bookmark
+                if (!this.requireAuth('bookmark articles')) {
+                    return;
+                }
+
+                try {
+                    await axios.patch(`${API_BASE_URL}/articles/${articleId}/bookmark`);
+                    await this.loadArticles();
+                    await this.loadStats();
+                } catch (error) {
+                    console.error('Error toggling bookmark:', error);
+                    const message = error.userMessage || 'Failed to toggle bookmark';
+                    this.showError(message);
+                }
+            },
+
+            toggleSelect(articleId) {
+                const index = this.selectedArticles.indexOf(articleId);
+                if (index === -1) {
+                    this.selectedArticles.push(articleId);
+                } else {
+                    this.selectedArticles.splice(index, 1);
+                }
+            },
+
+            requireAuth(action = 'perform this action') {
+                if (!this.isAuthenticated) {
+                    this.showAuthPromptModal(action);
+                    return false;
+                }
+                return true;
+            },
+
+            showAuthPromptModal(context) {
+                this.authPromptContext = context;
+                this.showAuthPrompt = true;
+            },
+
+            closeAuthPrompt() {
+                this.showAuthPrompt = false;
+                this.authPromptContext = null;
+            },
+
+            proceedToAuth(mode = 'signup') {
+                // Store selected articles in localStorage for recovery after auth
+                if (this.selectedArticles.length > 0) {
+                    localStorage.setItem('pending_articles', JSON.stringify(this.selectedArticles));
+                }
+
+                // Navigate to auth page with return context
+                const returnUrl = `${window.location.pathname}?action=generate-post&articles=${this.selectedArticles.join(',')}`;
+                window.location.href = `auth.html?view=${mode}&return=${encodeURIComponent(returnUrl)}`;
+            },
+
+            // Initialize loading screen state
+            initializeLoadingScreen() {
+                this.showGeneratingScreen = true;
+                this.generationError = null;
+                this.showTimeoutWarning = false;
+                this.generationStartTime = Date.now();
+
+                // Reset platform status
+                this.platformStatus = {
+                    linkedin: 'pending',
+                    twitter: 'pending',
+                    threads: 'pending'
+                };
+
+                this.generationStatus = {
+                    linkedin: 'Waiting to start...',
+                    twitter: 'Waiting to start...',
+                    threads: 'Waiting to start...'
+                };
+
+                this.generationProgressMessage = 'Initializing AI content generation...';
+
+                // Set timeout warning (show after 30 seconds)
+                if (this.timeoutWarningTimer) {
+                    clearTimeout(this.timeoutWarningTimer);
+                }
+                this.timeoutWarningTimer = setTimeout(() => {
+                    if (this.showGeneratingScreen && !this.generationError) {
+                        this.showTimeoutWarning = true;
+                    }
+                }, 30000);
+            },
+
+            // Update platform loading status with animation
+            updatePlatformStatus(platform, status, message) {
+                this.platformStatus[platform] = status;
+                this.generationStatus[platform] = message;
+            },
+
+            // Simulate progressive loading updates
+            simulateProgressUpdates() {
+                // LinkedIn starts immediately
+                setTimeout(() => {
+                    if (this.showGeneratingScreen) {
+                        this.updatePlatformStatus('linkedin', 'loading', 'Analyzing article content...');
+                        this.generationProgressMessage = 'Crafting professional LinkedIn post...';
+                    }
+                }, 500);
+
+                // Twitter starts after LinkedIn
+                setTimeout(() => {
+                    if (this.showGeneratingScreen) {
+                        this.updatePlatformStatus('twitter', 'loading', 'Analyzing article content...');
+                        this.generationProgressMessage = 'Creating concise Twitter thread...';
+                    }
+                }, 1500);
+
+                // Threads starts last
+                setTimeout(() => {
+                    if (this.showGeneratingScreen) {
+                        this.updatePlatformStatus('threads', 'loading', 'Analyzing article content...');
+                        this.generationProgressMessage = 'Generating Threads post...';
+                    }
+                }, 2500);
+            },
+
+            // Complete loading screen with success
+            completeLoadingScreen() {
+                // Mark all platforms as complete
+                this.updatePlatformStatus('linkedin', 'complete', 'Ready!');
+                this.updatePlatformStatus('twitter', 'complete', 'Ready!');
+                this.updatePlatformStatus('threads', 'complete', 'Ready!');
+                this.generationProgressMessage = 'All posts generated successfully!';
+
+                // Clear timeout warning timer
+                if (this.timeoutWarningTimer) {
+                    clearTimeout(this.timeoutWarningTimer);
+                }
+
+                // Wait a moment to show completion, then transition to editor
+                setTimeout(() => {
+                    this.showGeneratingScreen = false;
+                    this.currentView = 'editor';
+                }, 1500);
+            },
+
+            // Handle loading screen error
+            handleLoadingError(errorMessage) {
+                this.generationError = errorMessage;
+                this.generationProgressMessage = 'Generation failed';
+
+                // Mark all loading platforms as failed
+                Object.keys(this.platformStatus).forEach(platform => {
+                    if (this.platformStatus[platform] === 'loading') {
+                        this.updatePlatformStatus(platform, 'pending', 'Failed');
+                    }
+                });
+
+                // Clear timeout warning timer
+                if (this.timeoutWarningTimer) {
+                    clearTimeout(this.timeoutWarningTimer);
+                }
+            },
+
+            // Retry generation after error
+            retryGeneration() {
+                this.generatePosts();
+            },
+
+            // Cancel generation
+            cancelGeneration() {
+                this.showGeneratingScreen = false;
+                this.generationError = null;
+                this.showTimeoutWarning = false;
+
+                if (this.timeoutWarningTimer) {
+                    clearTimeout(this.timeoutWarningTimer);
+                }
+            },
+
+            async generatePosts() {
+                if (this.selectedArticles.length === 0) {
+                    this.showError('Please select at least one article');
+                    return;
+                }
+
+                // Require authentication to generate posts
+                if (!this.requireAuth('generate posts')) {
+                    return;
+                }
+
+                // Initialize and show loading screen
+                this.initializeLoadingScreen();
+
+                // Simulate progressive updates
+                this.simulateProgressUpdates();
+
+                try {
+                    const response = await axios.post(`${API_BASE_URL}/posts/generate`, {
+                        article_ids: this.selectedArticles,
+                        platforms: ['twitter', 'linkedin', 'threads']
+                    });
+
+                    this.generatedContent = response.data;
+                    this.editableContent = {
+                        twitter: response.data.content.twitter || '',
+                        linkedin: response.data.content.linkedin || '',
+                        threads: response.data.content.threads || ''
+                    };
+
+                    // Complete loading screen with success animation
+                    this.completeLoadingScreen();
+
+                } catch (error) {
+                    console.error('Error generating posts:', error);
+
+                    // Better error handling - show helpful message
+                    if (error.response?.status === 400) {
+                        const errorMsg = error.userMessage || '';
+
+                        if (errorMsg.includes('API key')) {
+                            // Show error on loading screen with option to go to profile
+                            this.handleLoadingError('No API key configured. Please add your OpenAI or Anthropic API key in your Profile settings.');
+                        } else {
+                            this.handleLoadingError(errorMsg || 'Failed to generate posts. Please try again.');
+                        }
+                    } else {
+                        const message = error.userMessage || 'Failed to generate posts. Please check your connection and try again.';
+                        this.handleLoadingError(message);
+                    }
+                }
+            },
+
+            async regenerateContent() {
+                this.showSuccess('Regenerating content...');
+                await this.generatePosts();
+            },
+
+            async saveDraft() {
+                if (!this.generatedContent) return;
+
+                try {
+                    await axios.patch(`${API_BASE_URL}/posts/${this.generatedContent.post_id}`, {
+                        twitter_content: this.editableContent.twitter,
+                        linkedin_content: this.editableContent.linkedin,
+                        threads_content: this.editableContent.threads
+                    });
+
+                    this.showSuccess('Draft saved!');
+                } catch (error) {
+                    console.error('Error saving draft:', error);
+                    const message = error.userMessage || 'Failed to save draft';
+                    this.showError(message);
+                }
+            },
+
+            async publishPosts() {
+                if (!this.generatedContent) return;
+
+                if (!confirm(`Are you sure you want to publish to ${this.selectedPlatform}?`)) {
+                    return;
+                }
+
+                this.loading = true;
+                try {
+                    await axios.post(`${API_BASE_URL}/posts/publish`, {
+                        post_id: this.generatedContent.post_id,
+                        platforms: [this.selectedPlatform]
+                    });
+
+                    this.showSuccess(`Published to ${this.selectedPlatform}!`);
+                    await this.loadPosts();
+                    this.selectedArticles = [];
+                    this.generatedContent = null;
+                    this.currentView = 'history';
+                } catch (error) {
+                    console.error('Error publishing:', error);
+                    const message = error.userMessage || 'Failed to publish. Make sure your social media API keys are configured.';
+                    this.showError(message);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            getCategoryColor(category) {
+                const colors = {
+                    news: 'bg-blue-100 text-blue-800',
+                    research: 'bg-purple-100 text-purple-800',
+                    company: 'bg-green-100 text-green-800',
+                    newsletter: 'bg-yellow-100 text-yellow-800'
+                };
+                return colors[category] || 'bg-gray-100 text-gray-800';
+            },
+
+            getStatusColor(status) {
+                const colors = {
+                    draft: 'bg-gray-100 text-gray-800',
+                    published: 'bg-green-100 text-green-800',
+                    failed: 'bg-red-100 text-red-800'
+                };
+                return colors[status] || 'bg-gray-100 text-gray-800';
+            },
+
+            getMaxLength(platform) {
+                const limits = {
+                    twitter: 280,
+                    linkedin: 3000,
+                    threads: 500
+                };
+                return limits[platform] || 280;
+            },
+
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffTime = Math.abs(now - date);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 0) return 'Today';
+                if (diffDays === 1) return 'Yesterday';
+                if (diffDays < 7) return `${diffDays}d ago`;
+                return date.toLocaleDateString();
+            },
+
+            getDisplaySummary(article) {
+                // For research articles, extract only the Abstract content
+                if (article.category === 'research' && article.summary) {
+                    const abstractMatch = article.summary.match(/Abstract:\s*([\s\S]*?)(?:\n\n|$)/);
+                    if (abstractMatch && abstractMatch[1]) {
+                        return abstractMatch[1].trim();
+                    }
+                    // Fallback: if "Abstract:" exists but pattern doesn't match, try simpler extraction
+                    const abstractIndex = article.summary.indexOf('Abstract:');
+                    if (abstractIndex !== -1) {
+                        return article.summary.substring(abstractIndex + 9).trim();
+                    }
+                }
+                // For non-research articles or if Abstract not found, return full summary
+                return article.summary || 'No summary available';
+            },
+
+            trackArticleView(article) {
+                // Track when user clicks "Read More"
+                if (window.analyticsClient) {
+                    window.analyticsClient.trackEvent('article_view', {
+                        article_id: article.id,
+                        article_title: article.title,
+                        source: article.source,
+                        category: article.category
+                    });
+                }
+            },
+
+            showSuccess(message) {
+                alert(message);
+            },
+
+            showError(message) {
+                alert('Error: ' + message);
+            }
+        }
+    });
+
+    console.log('[App] Mounting Vue app to #app');
+
+    try {
+        app.mount('#app');
+        console.log('[App] Vue app mounted successfully!');
+    } catch (error) {
+        console.error('[App] Failed to mount Vue app:', error);
+        document.body.innerHTML = '<div style="background: #fee; border: 2px solid red; padding: 20px; margin: 20px; font-family: sans-serif;">' +
+            '<h1 style="color: red;">Vue.js Mount Failed</h1>' +
+            '<p>Error: ' + error.message + '</p>' +
+            '<p>Check browser console for details.</p>' +
+            '</div>';
+    }
+    } // End of startVueApp function
+
+    // Start the initialization process
+    initApp();
+})();

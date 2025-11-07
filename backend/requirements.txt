@@ -1,0 +1,76 @@
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-dotenv==1.0.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.23
+alembic>=1.12.0
+psycopg2-binary>=2.9.9  # PostgreSQL adapter
+
+# Data Validation
+pydantic>=2.5.0
+pydantic-settings==2.1.0
+pydantic[email]>=2.5.0
+python-dateutil==2.8.2
+
+# Authentication & Security
+bcrypt>=4.0.1
+cryptography==41.0.7
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]==1.7.4
+PyJWT>=2.8.0
+# Note: Using custom CSRF implementation (Python 3.9 compatible)
+
+# Phase 3: OAuth & Email
+authlib==1.3.0
+httpx==0.25.2
+sendgrid==6.11.0
+jinja2>=3.1.2
+
+# Phase 4: Security & Monitoring
+user-agents==2.2.0  # Mobile User-Agent parsing for iOS detection
+
+# Input Sanitization
+bleach>=6.1.0  # HTML sanitization
+
+# Rate Limiting
+slowapi>=0.1.9  # Rate limiting middleware
+
+# Performance & Optimization
+redis>=4.5.0              # Caching backend
+aiofiles>=23.2.0          # Async file operations
+loguru>=0.7.0             # Advanced logging
+psutil>=5.9.0             # System metrics
+structlog>=24.1.0         # Structured logging for performance monitoring
+
+# Retry & Resilience
+tenacity>=8.2.0           # Retry logic with exponential backoff
+
+# Error Tracking & Monitoring
+sentry-sdk[fastapi]>=2.0.0  # Error tracking with FastAPI integration
+
+# HTTP Client for DeepSeek API
+requests>=2.31.0          # HTTP library for DeepSeek client
+urllib3>=2.1.0            # HTTP client library
+
+# RSS Feed Management
+feedparser>=6.0.10        # RSS/Atom feed parsing
+beautifulsoup4>=4.12.0    # HTML parsing for feed discovery
+lxml>=4.9.0               # Fast XML/HTML parser
+
+# Article Content Enrichment (Tasks 2.8 + 2.13)
+readability-lxml>=0.8.1   # Article full-text extraction with readability algorithm
+Pillow>=10.0.0            # Image processing and validation
+
+# AI/ML - Phase 3: AI Post Generation
+openai>=1.0.0             # OpenAI GPT-4 API client
+anthropic>=0.8.0          # Anthropic Claude API client
+tiktoken>=0.5.0           # Token counting for OpenAI models
+
+# Development & Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0

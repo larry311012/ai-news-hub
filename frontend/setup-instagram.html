@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram & Threads Setup Guide - AI News Hub</title>
+    <style>
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 9999;
+            animation: confetti 3s linear forwards;
+        }
+        .gradient-instagram {
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+        }
+        .gradient-threads {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-gray-50">
+    <div id="setup-app">
+        <!-- Header -->
+        <div class="bg-white border-b border-gray-200">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <button @click="goBack" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors mb-4">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Profile
+                </button>
+
+                <!-- Hero Section -->
+                <div class="flex items-start gap-6">
+                    <!-- Platform Logos -->
+                    <div class="flex-shrink-0 flex gap-2">
+                        <!-- Instagram Logo -->
+                        <div class="w-14 h-14 gradient-instagram rounded-2xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </div>
+                        <!-- Threads Logo -->
+                        <div class="w-14 h-14 bg-black rounded-2xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 013.02.142l-.047 1.011c-.96-.143-1.95-.157-2.887-.041-1.043.13-1.802.445-2.384.99-.55.515-.805 1.191-.75 2.013.048.741.423 1.326 1.09 1.696.607.337 1.407.463 2.258.42 1.175-.06 2.051-.493 2.674-1.322.505-.67.82-1.56.942-2.644.005-.043.008-.085.011-.128l.047-1.011c.039-.427.062-.872.069-1.336.007-.463-.01-.931-.049-1.404a6.27 6.27 0 00-.178-1.385c-.444-1.824-1.448-3.326-2.987-4.468C16.045.725 13.748.02 11.002 0h-.014C7.408.024 4.653 1.205 2.803 3.509 1.157 5.561.308 8.415.28 11.993v.017c.028 3.579.879 6.43 2.525 8.482 1.849 2.304 4.604 3.485 8.188 3.509h.007c2.746-.02 5.043-.725 6.826-2.098 1.532-1.18 2.613-2.81 3.206-4.835l1.89.651c-.711 2.418-2.013 4.376-3.867 5.816-2.04 1.58-4.693 2.433-7.894 2.513z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="flex-1">
+                        <h1 class="text-3xl font-bold text-gray-900">Connect Instagram & Threads</h1>
+                        <p class="mt-2 text-gray-600">Share visual content and engage with communities on Meta's platforms</p>
+                        <div class="mt-4 flex items-center gap-4 text-sm">
+                            <span class="inline-flex items-center text-gray-500">
+                                <svg class="w-5 h-5 mr-1.5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Estimated time: ~10 minutes
+                            </span>
+                            <span class="inline-flex items-center text-gray-500">
+                                <svg class="w-5 h-5 mr-1.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Difficulty: Easy
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between text-sm mb-2">
+                    <span class="text-gray-600 font-medium">Setup Progress</span>
+                    <span class="text-purple-600 font-semibold">Step {{ currentStep }} of {{ totalSteps }}</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="gradient-threads h-2 rounded-full transition-all duration-500" :style="`width: ${progress}%`"></div>
+                </div>
+            </div>
+
+            <!-- Prerequisites -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-purple-900 mb-3 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    Before You Start
+                </h3>
+                <ul class="space-y-2">
+                    <li class="flex items-start text-sm text-purple-800">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        You need an Instagram Business or Creator account
+                    </li>
+                    <li class="flex items-start text-sm text-purple-800">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Threads uses the same connection (both are Meta platforms)
+                    </li>
+                    <li class="flex items-start text-sm text-purple-800">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        No developer account needed - we handle OAuth for you
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Step-by-Step Guide -->
+            <div class="space-y-4">
+                <!-- Step 1: Introduction -->
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" :class="{ 'ring-2 ring-purple-500': currentStep === 1 }">
+                    <button @click="toggleStep(1)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div :class="[
+                                'w-8 h-8 rounded-full flex items-center justify-center font-semibold',
+                                stepCompleted[1] ? 'bg-green-500 text-white' : currentStep === 1 ? 'gradient-instagram text-white' : 'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[1]" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>1</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Understand Visual Sharing</h3>
+                                <p class="text-sm text-gray-500">Learn about Instagram & Threads integration</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 transform transition-transform" :class="{ 'rotate-180': expandedSteps[1] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[1]" class="px-6 pb-6 border-t border-gray-100">
+                        <div class="pt-6 space-y-4">
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
+                                <h4 class="font-semibold text-purple-900 mb-2 flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Visual Content Made Easy
+                                </h4>
+                                <p class="text-sm text-purple-800 mb-3">
+                                    Share AI-generated visual content on Instagram and Threads. Our platform automatically
+                                    generates images to accompany your posts, optimized for maximum engagement.
+                                </p>
+                                <div class="bg-white rounded-md p-3 text-sm text-gray-700">
+                                    <strong>What you can do:</strong>
+                                    <ul class="list-disc list-inside mt-1 space-y-1">
+                                        <li>Post AI-generated images to Instagram feed</li>
+                                        <li>Share text updates on Threads</li>
+                                        <li>Cross-post to both platforms simultaneously</li>
+                                        <li>Engage with your visual community</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-amber-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="ml-3">
+                                        <h4 class="text-sm font-semibold text-amber-900">Important Note</h4>
+                                        <p class="mt-1 text-sm text-amber-700">
+                                            Instagram requires a Business or Creator account for API access. Personal accounts cannot be connected.
+                                            You can easily convert your account in Instagram settings.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button @click="completeStep(1)" class="w-full px-4 py-2 gradient-instagram text-white rounded-md hover:opacity-90 transition-opacity font-medium">
+                                I Understand - Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Connect Accounts -->
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" :class="{ 'ring-2 ring-purple-500': currentStep === 2 }">
+                    <button @click="toggleStep(2)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors" :disabled="!stepCompleted[1]">
+                        <div class="flex items-center gap-4">
+                            <div :class="[
+                                'w-8 h-8 rounded-full flex items-center justify-center font-semibold',
+                                stepCompleted[2] ? 'bg-green-500 text-white' : currentStep === 2 ? 'gradient-instagram text-white' : 'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[2]" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>2</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Connect Your Accounts</h3>
+                                <p class="text-sm text-gray-500">Link Instagram and Threads to AI News Hub</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 transform transition-transform" :class="{ 'rotate-180': expandedSteps[2] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[2]" class="px-6 pb-6 border-t border-gray-100">
+                        <div class="pt-6 space-y-4">
+                            <!-- Instagram Connection -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div :class="[
+                                            'w-12 h-12 rounded-lg flex items-center justify-center',
+                                            instagramConnected ? 'gradient-instagram' : 'bg-gray-200'
+                                        ]">
+                                            <svg :class="[
+                                                'w-6 h-6',
+                                                instagramConnected ? 'text-white' : 'text-gray-600'
+                                            ]" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-medium text-gray-900">Instagram</h4>
+                                            <p class="text-xs text-gray-500">Visual content platform</p>
+                                        </div>
+                                    </div>
+                                    <span v-if="instagramConnected" class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-green-400 mr-1"></span>
+                                        Connected
+                                    </span>
+                                </div>
+
+                                <!-- Instagram OAuth Component -->
+                                <instagram-oauth-connect @connection-status="handleInstagramConnection"></instagram-oauth-connect>
+                            </div>
+
+                            <!-- Threads Connection -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div :class="[
+                                            'w-12 h-12 rounded-lg flex items-center justify-center',
+                                            threadsConnected ? 'bg-black' : 'bg-gray-200'
+                                        ]">
+                                            <svg :class="[
+                                                'w-6 h-6',
+                                                threadsConnected ? 'text-white' : 'text-gray-600'
+                                            ]" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 013.02.142l-.047 1.011c-.96-.143-1.95-.157-2.887-.041-1.043.13-1.802.445-2.384.99-.55.515-.805 1.191-.75 2.013.048.741.423 1.326 1.09 1.696.607.337 1.407.463 2.258.42 1.175-.06 2.051-.493 2.674-1.322.505-.67.82-1.56.942-2.644.005-.043.008-.085.011-.128l.047-1.011c.039-.427.062-.872.069-1.336.007-.463-.01-.931-.049-1.404a6.27 6.27 0 00-.178-1.385c-.444-1.824-1.448-3.326-2.987-4.468C16.045.725 13.748.02 11.002 0h-.014C7.408.024 4.653 1.205 2.803 3.509 1.157 5.561.308 8.415.28 11.993v.017c.028 3.579.879 6.43 2.525 8.482 1.849 2.304 4.604 3.485 8.188 3.509h.007c2.746-.02 5.043-.725 6.826-2.098 1.532-1.18 2.613-2.81 3.206-4.835l1.89.651c-.711 2.418-2.013 4.376-3.867 5.816-2.04 1.58-4.693 2.433-7.894 2.513z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-medium text-gray-900">Threads</h4>
+                                            <p class="text-xs text-gray-500">Text-based conversations</p>
+                                        </div>
+                                    </div>
+                                    <span v-if="threadsConnected" class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-green-400 mr-1"></span>
+                                        Connected
+                                    </span>
+                                </div>
+
+                                <!-- Threads OAuth Component -->
+                                <threads-oauth-connect @connection-status="handleThreadsConnection"></threads-oauth-connect>
+                            </div>
+
+                            <div v-if="instagramConnected || threadsConnected" class="flex gap-3">
+                                <button @click="completeStep(2)" class="flex-1 px-4 py-2 gradient-instagram text-white rounded-md hover:opacity-90 transition-opacity font-medium">
+                                    Continue to Testing
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Test Connections -->
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" :class="{ 'ring-2 ring-purple-500': currentStep === 3 }">
+                    <button @click="toggleStep(3)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors" :disabled="!stepCompleted[2]">
+                        <div class="flex items-center gap-4">
+                            <div :class="[
+                                'w-8 h-8 rounded-full flex items-center justify-center font-semibold',
+                                stepCompleted[3] ? 'bg-green-500 text-white' : currentStep === 3 ? 'gradient-instagram text-white' : 'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[3]" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>3</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Test Your Connections</h3>
+                                <p class="text-sm text-gray-500">Verify both platforms are ready</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 transform transition-transform" :class="{ 'rotate-180': expandedSteps[3] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[3]" class="px-6 pb-6 border-t border-gray-100">
+                        <div class="pt-6 space-y-4">
+                            <p class="text-sm text-gray-600">
+                                Test your connections to ensure everything is working correctly.
+                            </p>
+
+                            <div v-if="testResult" class="rounded-lg p-4" :class="testResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
+                                <div class="flex items-start">
+                                    <svg v-if="testResult.success" class="w-5 h-5 text-green-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <svg v-else class="w-5 h-5 text-red-600 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-medium" :class="testResult.success ? 'text-green-800' : 'text-red-800'">
+                                            {{ testResult.message }}
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button @click="testConnection" :disabled="testing || (!instagramConnected && !threadsConnected)" class="w-full px-4 py-2 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span v-if="!testing">Test Connections</span>
+                                <span v-else>Testing...</span>
+                            </button>
+
+                            <button v-if="testResult && testResult.success" @click="completeStep(3)" class="w-full px-4 py-2 gradient-instagram text-white rounded-md hover:opacity-90 transition-opacity font-medium">
+                                Complete Setup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Section -->
+            <div v-if="setupComplete" class="mt-8 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-8 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Setup Complete!</h2>
+                <p class="text-gray-600 mb-6">Your Meta platforms are now connected and ready to use.</p>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button @click="goToNewsFeed" class="px-6 py-3 gradient-instagram text-white rounded-md hover:opacity-90 transition-opacity font-medium">
+                        Create Your First Post
+                    </button>
+                    <button @click="goBack" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium">
+                        Back to Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load OAuth Components -->
+    <script type="module" src="components/InstagramOAuthConnect.js"></script>
+    <script type="module" src="components/ThreadsOAuthConnect.js"></script>
+    <script type="module" src="setup-instagram.js"></script>
+</body>
+</html>

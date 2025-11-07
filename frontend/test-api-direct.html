@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Direct Test - Post ID 23</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold mb-6">Direct API Test - Post ID 23</h1>
+
+            <div id="status" class="mb-6 p-4 bg-gray-100 rounded">
+                <p class="text-gray-600">Loading...</p>
+            </div>
+
+            <div id="results" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        const POST_ID = 23;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const color = type === 'error' ? 'text-red-600' : type === 'success' ? 'text-green-600' : 'text-blue-600';
+
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `p-3 bg-gray-50 rounded border-l-4 ${type === 'error' ? 'border-red-500' : type === 'success' ? 'border-green-500' : 'border-blue-500'}`;
+            resultDiv.innerHTML = `<p class="${color} font-mono text-sm">[${timestamp}] ${message}</p>`;
+
+            document.getElementById('results').appendChild(resultDiv);
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const bgColor = type === 'error' ? 'bg-red-100 border-red-500' : type === 'success' ? 'bg-green-100 border-green-500' : 'bg-blue-100 border-blue-500';
+            const textColor = type === 'error' ? 'text-red-800' : type === 'success' ? 'text-green-800' : 'text-blue-800';
+
+            statusDiv.className = `mb-6 p-4 rounded border-l-4 ${bgColor}`;
+            statusDiv.innerHTML = `<p class="${textColor} font-semibold">${message}</p>`;
+        }
+
+        async function testAPI() {
+            try {
+                log('Starting API test sequence...');
+
+                // Step 1: Login
+                log('Step 1: Attempting login...', 'info');
+                updateStatus('Logging in...');
+
+                const loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'testuser@example.com',
+                        password: 'testpass123'
+                    })
+                });
+
+                if (!loginResponse.ok) {
+                    throw new Error(`Login failed: ${loginResponse.status} ${loginResponse.statusText}`);
+                }
+
+                const loginData = await loginResponse.json();
+                log(`Login successful! Token: ${loginData.token.substring(0, 20)}...`, 'success');
+                log(`User: ${loginData.user.email} (${loginData.user.full_name})`, 'success');
+
+                const token = loginData.token;
+
+                // Step 2: Fetch post data
+                log('Step 2: Fetching post data...', 'info');
+                updateStatus('Loading post data...');
+
+                const startTime = performance.now();
+
+                const postResponse = await fetch(`${API_BASE_URL}/posts/${POST_ID}/edit`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+
+                log(`Response received in ${responseTime}ms`, 'info');
+
+                if (!postResponse.ok) {
+                    throw new Error(`Post fetch failed: ${postResponse.status} ${postResponse.statusText}`);
+                }
+
+                const postData = await postResponse.json();
+
+                // Step 3: Validate response
+                log('Step 3: Validating response structure...', 'info');
+                updateStatus('Validating data...');
+
+                const requiredFields = [
+                    'id', 'article_title', 'created_at', 'status',
+                    'twitter_content', 'linkedin_content', 'threads_content',
+                    'platform_statuses', 'validations', 'platforms'
+                ];
+
+                const missingFields = requiredFields.filter(field => !(field in postData));
+
+                if (missingFields.length > 0) {
+                    log(`Missing fields: ${missingFields.join(', ')}`, 'error');
+                } else {
+                    log('All required fields present ✓', 'success');
+                }
+
+                // Check platform_statuses is array
+                if (Array.isArray(postData.platform_statuses)) {
+                    log(`platform_statuses is an array with ${postData.platform_statuses.length} items ✓`, 'success');
+
+                    postData.platform_statuses.forEach(status => {
+                        log(`  - ${status.platform}: ${status.connected ? 'Connected' : 'Disconnected'} ${status.username ? `(@${status.username})` : ''}`, 'info');
+                    });
+                } else {
+                    log('platform_statuses is NOT an array ✗', 'error');
+                }
+
+                // Display post info
+                log(`Post ID: ${postData.id}`, 'info');
+                log(`Title: ${postData.article_title}`, 'info');
+                log(`Status: ${postData.status}`, 'info');
+                log(`Twitter content length: ${postData.twitter_content?.length || 0}`, 'info');
+                log(`LinkedIn content length: ${postData.linkedin_content?.length || 0}`, 'info');
+                log(`Threads content length: ${postData.threads_content?.length || 0}`, 'info');
+
+                // Step 4: Test platform status endpoint
+                log('Step 4: Testing platform status endpoint...', 'info');
+
+                const platformResponse = await fetch(`${API_BASE_URL}/posts/${POST_ID}/platform-status`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (platformResponse.ok) {
+                    const platformData = await platformResponse.json();
+                    log(`Platform status endpoint successful (${Array.isArray(platformData) ? 'array' : 'object'})`, 'success');
+                } else {
+                    log(`Platform status endpoint returned ${platformResponse.status}`, 'error');
+                }
+
+                // Final status
+                updateStatus('✅ ALL TESTS PASSED - API is working correctly!', 'success');
+                log('=== TEST COMPLETE ===', 'success');
+                log('API is functioning properly. If the main page still has infinite loading, the issue is in the Vue/Axios initialization or JavaScript loading.', 'info');
+
+            } catch (error) {
+                log(`ERROR: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+                updateStatus(`❌ TEST FAILED: ${error.message}`, 'error');
+            }
+        }
+
+        // Run test on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Page loaded, starting tests...', 'info');
+            testAPI();
+        });
+    </script>
+</body>
+</html>

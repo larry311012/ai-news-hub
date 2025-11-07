@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Setup Guide - AI News Hub</title>
+    <style>
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+            20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes checkmark {
+            0% { transform: scale(0) rotate(-45deg); }
+            50% { transform: scale(1.2) rotate(-45deg); }
+            100% { transform: scale(1) rotate(-45deg); }
+        }
+        @keyframes pulse-warning {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        }
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            z-index: 9999;
+            animation: confetti-fall 3s linear forwards;
+            pointer-events: none;
+        }
+        .shake-animation {
+            animation: shake 0.4s ease-in-out;
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        .checkmark-animation {
+            animation: checkmark 0.4s ease-out;
+        }
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+        .pulse-warning {
+            animation: pulse-warning 2s infinite;
+        }
+    </style>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-gray-50">
+    <div id="setup-app">
+        <!-- Header -->
+        <div class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                <button @click="goBack" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors mb-3 sm:mb-4">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Profile
+                </button>
+
+                <!-- Hero Section -->
+                <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                    <!-- LinkedIn Logo -->
+                    <div class="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 rounded-2xl flex items-center justify-center">
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                    </div>
+
+                    <div class="flex-1">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Connect Your LinkedIn Account</h1>
+                        <p class="mt-2 text-sm sm:text-base text-gray-600">Follow these 7 simple steps to set up automatic posting to LinkedIn</p>
+                        <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+                            <span class="inline-flex items-center text-gray-500">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Total time: ~12 minutes
+                            </span>
+                            <span class="inline-flex items-center text-gray-500">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Difficulty: Easy
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar (Desktop) -->
+                <div class="hidden md:block mt-6">
+                    <div class="flex items-center justify-between">
+                        <div v-for="step in 7" :key="step" class="flex items-center" :class="step < 7 ? 'flex-1' : ''">
+                            <!-- Step Circle -->
+                            <div class="relative flex flex-col items-center">
+                                <div :class="[
+                                    'w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-300',
+                                    currentStep > step ? 'bg-green-500 text-white' :
+                                    currentStep === step ? 'bg-blue-600 text-white ring-4 ring-blue-100' :
+                                    'bg-gray-200 text-gray-500'
+                                ]">
+                                    <svg v-if="currentStep > step" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span v-else>{{ step }}</span>
+                                </div>
+                                <span :class="[
+                                    'absolute -bottom-6 text-xs whitespace-nowrap font-medium',
+                                    currentStep >= step ? 'text-gray-900' : 'text-gray-500'
+                                ]">
+                                    {{ stepTitles[step - 1] }}
+                                </span>
+                            </div>
+                            <!-- Connector Line -->
+                            <div v-if="step < 6" :class="[
+                                'h-1 flex-1 mx-2 transition-all duration-300',
+                                currentStep > step ? 'bg-green-500' : 'bg-gray-200'
+                            ]"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar (Mobile) -->
+                <div class="md:hidden mt-6">
+                    <div class="flex items-center justify-between text-xs mb-2">
+                        <span class="text-gray-600 font-medium">Step {{ currentStep }} of 7</span>
+                        <span class="text-blue-600 font-semibold">{{ Math.round((currentStep / 7) * 100) }}% Complete</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" :style="`width: ${(currentStep / 7) * 100}%`"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <!-- Prerequisites -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
+                <h3 class="text-base sm:text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    Before You Start - Make Sure You Have
+                </h3>
+                <ul class="space-y-2 text-xs sm:text-sm text-blue-800">
+                    <li class="flex items-start">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span><strong>Active LinkedIn account</strong> with profile completed</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span><strong>Valid email address</strong> for verification</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span><strong>10-15 minutes</strong> to complete setup</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Steps Container -->
+            <div class="space-y-4 sm:space-y-6">
+                <!-- Step 1: Create LinkedIn Developer Account -->
+                <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                     :class="currentStep === 1 ? 'border-blue-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                    <button @click="toggleStep(1)"
+                            class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl">
+                        <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div :class="[
+                                'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                                stepCompleted[1] ? 'bg-green-500 text-white' :
+                                currentStep === 1 ? 'bg-blue-600 text-white' :
+                                'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[1]" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>1</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">Create LinkedIn Developer Account</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Get access to LinkedIn's API platform</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-blue-600 font-medium">~3 minutes</span>
+                                    <span v-if="stepCompleted[1]" class="text-xs text-green-600 font-medium flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                             :class="{ 'rotate-180': expandedSteps[1] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[1]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                        <div class="pt-4 sm:pt-6 space-y-4">
+                            <div class="prose prose-sm max-w-none">
+                                <p class="text-sm sm:text-base text-gray-700">
+                                    To post on LinkedIn via API, you need to create a LinkedIn Developer account. This is free and only takes a few minutes.
+                                </p>
+                            </div>
+
+                            <!-- Action Button -->
+                            <a href="https://www.linkedin.com/developers/apps"
+                               target="_blank"
+                               class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium shadow-lg hover:shadow-xl">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                </svg>
+                                Go to LinkedIn Developers
+                                <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+
+                            <!-- Helpful Tips -->
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                                <h4 class="text-sm font-semibold text-blue-900 mb-2 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Quick Tips:
+                                </h4>
+                                <ul class="text-xs sm:text-sm text-blue-800 space-y-1 list-disc list-inside">
+                                    <li>Sign in with your existing LinkedIn account</li>
+                                    <li>No additional registration needed - use your regular LinkedIn credentials</li>
+                                    <li>The developer portal is completely free</li>
+                                </ul>
+                            </div>
+
+                            <!-- Continue Button -->
+                            <div class="flex justify-end mt-6">
+                                <button @click="completeStep(1)"
+                                        class="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg">
+                                    I've created my account →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Create LinkedIn App -->
+                <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                     :class="currentStep === 2 ? 'border-blue-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                    <button @click="toggleStep(2)"
+                            :disabled="!stepCompleted[1]"
+                            class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div :class="[
+                                'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                                stepCompleted[2] ? 'bg-green-500 text-white' :
+                                currentStep === 2 ? 'bg-blue-600 text-white' :
+                                'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[2]" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>2</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">Create LinkedIn App</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Set up your LinkedIn app configuration</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-blue-600 font-medium">~3 minutes</span>
+                                    <span v-if="stepCompleted[2]" class="text-xs text-green-600 font-medium flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+<!-- NEW STEP 3: Enable LinkedIn Products - INSERT AFTER STEP 2 -->
+<!-- This critical step must be completed before users can use OAuth -->
+
+                <!-- Step 3: Enable LinkedIn Products - NEW CRITICAL STEP -->
+                <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                     :class="currentStep === 3 ? 'border-blue-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                    <button @click="toggleStep(3)"
+                            :disabled="!stepCompleted[2]"
+                            class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div :class="[
+                                'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                                stepCompleted[3] ? 'bg-green-500 text-white' :
+                                currentStep === 3 ? 'bg-blue-600 text-white' :
+                                'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[3]" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>3</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">CRITICAL: Enable LinkedIn Products</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Required for OAuth authentication</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-red-600 font-bold">MANDATORY</span>
+                                    <span class="text-xs text-blue-600 font-medium">~2 minutes</span>
+                                    <span v-if="stepCompleted[3]" class="text-xs text-green-600 font-medium flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                             :class="{ 'rotate-180': expandedSteps[3] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[3]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                        <div class="pt-4 sm:pt-6 space-y-4">
+                            <!-- CRITICAL WARNING - Make it IMPOSSIBLE to miss -->
+                            <div class="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 border-4 border-red-500 rounded-xl p-6 pulse-warning">
+                                <div class="flex items-start gap-4">
+                                    <div class="flex-shrink-0">
+                                        <svg class="w-14 h-14 text-red-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-xl font-black text-red-900 mb-3">WARNING: Skip This Step = OAuth Will Fail!</h4>
+                                        <p class="text-base font-semibold text-red-800 mb-4 leading-relaxed">
+                                            Before you can use LinkedIn OAuth, you <strong class="underline">MUST</strong> enable these Products in your LinkedIn app.
+                                            <span class="bg-red-200 px-2 py-1 rounded font-bold">WITHOUT these products, you will get "unauthorized_scope_error"!</span>
+                                        </p>
+                                        <div class="bg-white border-2 border-red-400 rounded-lg p-4">
+                                            <p class="text-sm font-bold text-red-900 mb-2">Why is this critical?</p>
+                                            <ul class="text-sm text-red-800 space-y-1 list-disc ml-5">
+                                                <li>LinkedIn requires explicit product approval for OAuth scopes</li>
+                                                <li>These products grant the permissions needed for authentication and posting</li>
+                                                <li>Without them, OAuth authentication will fail with scope errors</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- What Products to Enable -->
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-4 border-blue-400">
+                                <h4 class="text-lg font-bold text-blue-900 mb-4 flex items-center">
+                                    <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                        <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"/>
+                                    </svg>
+                                    You Must Enable BOTH of These Products:
+                                </h4>
+
+                                <!-- Product 1 -->
+                                <div class="bg-white border-2 border-green-400 rounded-lg p-5 mb-4 shadow-lg">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-lg">1</div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h5 class="text-lg font-bold text-green-900 mb-2">"Share on LinkedIn"</h5>
+                                            <p class="text-sm text-green-800 mb-2">
+                                                <strong>Purpose:</strong> Grants permission to post content to LinkedIn (w_member_social scope)
+                                            </p>
+                                            <div class="bg-green-100 border-l-4 border-green-500 p-3 rounded">
+                                                <p class="text-xs font-semibold text-green-900">Approval Status: Usually approved instantly</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Product 2 -->
+                                <div class="bg-white border-2 border-blue-400 rounded-lg p-5 shadow-lg">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg">2</div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h5 class="text-lg font-bold text-blue-900 mb-2">"Sign In with LinkedIn using OpenID Connect"</h5>
+                                            <p class="text-sm text-blue-800 mb-2">
+                                                <strong>Purpose:</strong> Enables user authentication and profile access (openid, profile scopes)
+                                            </p>
+                                            <div class="bg-blue-100 border-l-4 border-blue-500 p-3 rounded">
+                                                <p class="text-xs font-semibold text-blue-900">Approval Status: Usually approved instantly</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step-by-Step Instructions -->
+                            <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-gray-300">
+                                <h4 class="text-base font-bold text-gray-900 mb-4 flex items-center">
+                                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    How to Enable Products (Follow in Order):
+                                </h4>
+
+                                <ol class="space-y-4">
+                                    <li class="flex items-start gap-3">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">1</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-gray-900 mb-1">Go to Your LinkedIn App</p>
+                                            <p class="text-sm text-gray-700 mb-2">Visit: <a href="https://www.linkedin.com/developers/apps" target="_blank" class="text-blue-600 hover:underline font-mono">https://www.linkedin.com/developers/apps</a></p>
+                                            <p class="text-sm text-gray-600">Click on your app from the list</p>
+                                        </div>
+                                    </li>
+
+                                    <li class="flex items-start gap-3">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">2</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-gray-900 mb-1">Navigate to the "Products" Tab</p>
+                                            <p class="text-sm text-gray-700">Look for the <strong class="text-blue-600">"Products"</strong> tab in the top navigation bar</p>
+                                        </div>
+                                    </li>
+
+                                    <li class="flex items-start gap-3">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">3</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-gray-900 mb-2">Find & Enable "Share on LinkedIn"</p>
+                                            <ul class="text-sm text-gray-700 space-y-1 ml-4 list-disc">
+                                                <li>Look for the product card titled <strong>"Share on LinkedIn"</strong></li>
+                                                <li>Click <strong class="text-green-600">"Request access"</strong> or <strong class="text-green-600">"Select"</strong> button</li>
+                                                <li>Wait for approval (usually instant)</li>
+                                                <li>Verify it shows <strong class="text-green-600">"Added"</strong> status</li>
+                                            </ul>
+                                        </div>
+                                    </li>
+
+                                    <li class="flex items-start gap-3">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">4</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-gray-900 mb-2">Find & Enable "Sign In with LinkedIn using OpenID Connect"</p>
+                                            <ul class="text-sm text-gray-700 space-y-1 ml-4 list-disc">
+                                                <li>Look for the product card with this exact name</li>
+                                                <li>Click <strong class="text-green-600">"Request access"</strong> or <strong class="text-green-600">"Select"</strong> button</li>
+                                                <li>Wait for approval (usually instant)</li>
+                                                <li>Verify it shows <strong class="text-green-600">"Added"</strong> status</li>
+                                            </ul>
+                                        </div>
+                                    </li>
+
+                                    <li class="flex items-start gap-3 bg-green-50 border-2 border-green-400 rounded-lg p-3">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">5</span>
+                                        <div class="flex-1">
+                                            <p class="font-bold text-green-900 mb-1">Verify Both Products Show "Added"</p>
+                                            <p class="text-sm text-green-800">Both products should now appear in the "Products" section with <strong>"Added"</strong> status</p>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- Troubleshooting -->
+                            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-5 rounded-r-lg">
+                                <h4 class="text-base font-bold text-yellow-900 mb-3 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Troubleshooting:
+                                </h4>
+                                <ul class="space-y-2 text-sm text-yellow-800">
+                                    <li class="flex items-start">
+                                        <span class="font-bold mr-2">Q:</span>
+                                        <span><strong>I can't find the Products tab</strong> - Make sure you're viewing your app's detail page, not the apps list page</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="font-bold mr-2">Q:</span>
+                                        <span><strong>Products are still "Pending"</strong> - Usually approves within minutes. Refresh the page and check again</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="font-bold mr-2">Q:</span>
+                                        <span><strong>I enabled one but not the other</strong> - You MUST enable BOTH products. OAuth will fail if you only have one</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="font-bold mr-2">Q:</span>
+                                        <span><strong>Products were auto-added</strong> - Great! Some LinkedIn accounts have these pre-enabled. Verify both show "Added" status</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Validation Checkbox - Cannot proceed without checking -->
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-4 border-green-500 rounded-xl p-6 shadow-lg">
+                                <h4 class="text-lg font-bold text-green-900 mb-4 flex items-center">
+                                    <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Confirmation Required:
+                                </h4>
+                                <div class="space-y-3">
+                                    <label class="flex items-start gap-3 cursor-pointer p-4 bg-white border-2 rounded-lg hover:bg-green-50 transition-colors" :class="productsEnabled ? 'border-green-500' : 'border-gray-300'">
+                                        <input type="checkbox"
+                                               v-model="productsEnabled"
+                                               class="mt-1 w-6 h-6 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer">
+                                        <span class="flex-1">
+                                            <span class="block font-bold text-gray-900 mb-1">I have enabled BOTH required Products in my LinkedIn app</span>
+                                            <span class="block text-sm text-gray-600">
+                                                1. "Share on LinkedIn" - Status: Added
+                                                <br>
+                                                2. "Sign In with LinkedIn using OpenID Connect" - Status: Added
+                                            </span>
+                                        </span>
+                                    </label>
+
+                                    <div v-if="!productsEnabled" class="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded-r-lg">
+                                        <p class="text-sm font-semibold text-yellow-800 flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                            </svg>
+                                            You must check this box to continue to the next step
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Continue Button - Only enabled if checkbox is checked -->
+                            <div class="flex justify-end mt-6">
+                                <button @click="completeStep(3)"
+                                        :disabled="!productsEnabled"
+                                        class="px-8 py-4 bg-green-600 text-white font-bold text-lg rounded-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+                                        :class="!productsEnabled ? 'shake-animation' : ''">
+                                    <span v-if="productsEnabled">Continue to Copy Credentials →</span>
+                                    <span v-else>Check the box above to continue</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                             :class="{ 'rotate-180': expandedSteps[2] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[2]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                        <div class="pt-4 sm:pt-6 space-y-4">
+                            <div class="prose prose-sm max-w-none">
+                                <p class="text-sm sm:text-base text-gray-700">
+                                    In the LinkedIn Developer Portal, you'll create an "App" to generate your OAuth credentials.
+                                </p>
+                            </div>
+
+                            <!-- Step-by-step Instructions -->
+                            <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-4 sm:p-6 border border-gray-200">
+                                <h4 class="text-sm font-semibold text-gray-900 mb-3">Follow these steps:</h4>
+                                <ol class="space-y-3 text-xs sm:text-sm text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+                                        <span>Click the <strong>"Create app"</strong> button in the top right</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+                                        <span>Fill in your app name (e.g., "AI News Hub")</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+                                        <span>Select your LinkedIn Page (create one if needed)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
+                                        <span>Upload an app logo (can be your profile picture)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">5</span>
+                                        <span>Check the <strong>Legal Agreement</strong> box and click <strong>"Create app"</strong></span>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- Required Products -->
+                            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg">
+                                <h4 class="text-sm font-semibold text-yellow-900 mb-2 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Important - Request API Access:
+                                </h4>
+                                <p class="text-xs sm:text-sm text-yellow-800">
+                                    After creating your app, go to the <strong>"Products"</strong> tab and request access to:
+                                </p>
+                                <ul class="text-xs sm:text-sm text-yellow-800 space-y-1 list-disc list-inside mt-2">
+                                    <li><strong>Sign In with LinkedIn using OpenID Connect</strong></li>
+                                    <li><strong>Share on LinkedIn</strong></li>
+                                </ul>
+                            </div>
+
+                            <!-- Continue Button -->
+                            <div class="flex justify-end mt-6">
+                                <button @click="completeStep(2)"
+                                        class="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg">
+                                    App created →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Copy Client ID & Secret -->
+                <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                     :class="currentStep === 4 ? 'border-blue-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                    <button @click="toggleStep(3)"
+                            :disabled="!stepCompleted[3]"
+                            class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div :class="[
+                                'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                                stepCompleted[4] ? 'bg-green-500 text-white' :
+                                currentStep === 3 ? 'bg-blue-600 text-white' :
+                                'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[3]" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>4</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">Copy Client ID & Secret</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Save your OAuth credentials</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-blue-600 font-medium">~2 minutes</span>
+                                    <span v-if="stepCompleted[3]" class="text-xs text-green-600 font-medium flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                             :class="{ 'rotate-180': expandedSteps[4] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[3]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                        <div class="pt-4 sm:pt-6 space-y-4">
+                            <div class="prose prose-sm max-w-none">
+                                <p class="text-sm sm:text-base text-gray-700">
+                                    In your LinkedIn app, go to the <strong>"Auth"</strong> tab to find your credentials. These are like passwords - keep them safe!
+                                </p>
+                            </div>
+
+                            <!-- Where to Find Them -->
+                            <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-4 sm:p-6 border border-gray-200">
+                                <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Where to find your credentials:
+                                </h4>
+                                <ol class="space-y-2 text-xs sm:text-sm text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+                                        <span>In your app dashboard, click the <strong>"Auth"</strong> tab at the top</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+                                        <span>Under "Authentication keys", you'll see:
+                                            <ul class="ml-6 mt-1 space-y-1 list-disc">
+                                                <li><strong>Client ID</strong> - A long alphanumeric string (e.g., 86abc...xyz123)</li>
+                                                <li><strong>Client Secret</strong> - Click "Show" to reveal it, then copy</li>
+                                            </ul>
+                                        </span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+                                        <span>Copy both values - you'll need them in Step 5</span>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- Security Warning -->
+                            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                                <h4 class="text-sm font-semibold text-red-900 mb-2 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Keep these credentials secure!
+                                </h4>
+                                <ul class="text-xs sm:text-sm text-red-800 space-y-1 list-disc list-inside">
+                                    <li>Never share your Client Secret with anyone</li>
+                                    <li>Don't post them publicly or commit to Git</li>
+                                    <li>Treat them like passwords - they give access to your LinkedIn posting ability</li>
+                                </ul>
+                            </div>
+
+                            <!-- Continue Button -->
+                            <div class="flex justify-end mt-6">
+                                <button @click="completeStep(4)"
+                                        class="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg">
+                                    I've copied my credentials →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Set OAuth Redirect URI - IMPROVED WITH SUPER CLEAR INSTRUCTIONS -->
+                <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                     :class="currentStep === 5 ? 'border-blue-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                    <button @click="toggleStep(4)"
+                            :disabled="!stepCompleted[4]"
+                            class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div :class="[
+                                'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                                stepCompleted[5] ? 'bg-green-500 text-white' :
+                                currentStep === 4 ? 'bg-blue-600 text-white' :
+                                'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[4]" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>5</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">Set OAuth Redirect URI</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">CRITICAL: Must match exactly</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-blue-600 font-medium">~2 minutes</span>
+                                    <span v-if="stepCompleted[4]" class="text-xs text-green-600 font-medium flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                             :class="{ 'rotate-180': expandedSteps[5] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[4]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                        <div class="pt-4 sm:pt-6 space-y-4">
+                            <!-- CRITICAL WARNING BOX -->
+                            <div class="bg-gradient-to-r from-red-50 to-orange-50 border-4 border-red-400 rounded-xl p-5 pulse-warning">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0">
+                                        <svg class="w-10 h-10 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-bold text-red-900 mb-2">CRITICAL: Redirect URI Must Match EXACTLY</h4>
+                                        <p class="text-sm text-red-800 leading-relaxed">
+                                            This is the <strong>#1 reason OAuth fails</strong>. You must add the EXACT URL below to your LinkedIn app's OAuth settings. Even a single character difference (http vs https, trailing slash, typo) will cause a "redirect_uri does not match" error.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Redirect URI to Copy - ENHANCED -->
+                            <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-4 border-blue-400 rounded-xl p-5 shadow-lg">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <label class="block text-base font-bold text-blue-900">
+                                        Copy this EXACT redirect URI (no spaces, no changes):
+                                    </label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="text"
+                                           :value="redirectUri"
+                                           readonly
+                                           class="flex-1 px-4 py-4 bg-white border-4 border-blue-300 rounded-lg font-mono text-sm sm:text-base font-bold text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500 select-all cursor-pointer"
+                                           @click="$event.target.select()">
+                                    <button @click="copyRedirectUri"
+                                            class="px-5 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold flex items-center gap-2 shadow-lg hover:shadow-xl">
+                                        <svg v-if="redirectUriCopied" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <svg v-else class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">{{ redirectUriCopied ? 'COPIED!' : 'COPY' }}</span>
+                                    </button>
+                                </div>
+                                <p class="text-sm text-blue-800 mt-3 font-semibold">
+                                    Click the text box above to select all, then click COPY button
+                                </p>
+                            </div>
+
+                            <!-- Step-by-step Instructions - ENHANCED -->
+                            <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-5 border-2 border-gray-300">
+                                <h4 class="text-base font-bold text-gray-900 mb-4 flex items-center">
+                                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Follow these steps IN ORDER in your LinkedIn app:
+                                </h4>
+                                <ol class="space-y-4 text-sm text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 shadow">1</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold">Click the <span class="text-blue-600">"Auth"</span> tab at the top of your LinkedIn app page</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 shadow">2</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold">Scroll down to find <span class="text-blue-600">"OAuth 2.0 settings"</span> section</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 shadow">3</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold">Find <span class="text-blue-600">"Redirect URLs"</span> and click the <span class="text-blue-600">pencil/edit icon</span></p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 shadow">4</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold mb-2">Paste the redirect URI from above (use Ctrl+V or Cmd+V)</p>
+                                            <p class="text-xs text-gray-600 bg-white border border-gray-300 rounded p-2 font-mono">
+                                                {{ redirectUri }}
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 shadow">5</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold">Click <span class="text-green-600">"Add"</span> or <span class="text-green-600">"+ Add redirect URL"</span> button</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 shadow">6</span>
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-green-700">Click <span class="text-green-600">"Update"</span> button at the bottom to SAVE your changes</p>
+                                            <p class="text-xs text-red-600 mt-1">Don't forget this step! Changes won't be saved otherwise.</p>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- Common Mistakes - NEW SECTION -->
+                            <div class="bg-red-50 border-l-4 border-red-500 rounded-r-lg p-5">
+                                <h4 class="text-base font-bold text-red-900 mb-3 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Common Mistakes to AVOID:
+                                </h4>
+                                <ul class="space-y-2 text-sm text-red-800">
+                                    <li class="flex items-start">
+                                        <span class="text-red-600 font-bold mr-2">✗</span>
+                                        <span>Using <code class="bg-red-100 px-1 rounded">https://</code> instead of <code class="bg-red-100 px-1 rounded">http://</code> for localhost</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-600 font-bold mr-2">✗</span>
+                                        <span>Adding a trailing slash: <code class="bg-red-100 px-1 rounded">/callback/</code> (wrong!)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-600 font-bold mr-2">✗</span>
+                                        <span>Typos in the path (e.g., <code class="bg-red-100 px-1 rounded">callbak</code>, <code class="bg-red-100 px-1 rounded">linkedIn</code>)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-600 font-bold mr-2">✗</span>
+                                        <span>Wrong port number (must be <code class="bg-red-100 px-1 rounded">:8000</code>)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-600 font-bold mr-2">✗</span>
+                                        <span>Forgetting to click "Update" after adding the URL</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-600 font-bold mr-2">✗</span>
+                                        <span>Adding extra spaces before or after the URL</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Verification Checklist - NEW SECTION -->
+                            <div class="bg-green-50 border-2 border-green-400 rounded-lg p-5">
+                                <h4 class="text-base font-bold text-green-900 mb-3 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Before clicking "Continue", verify:
+                                </h4>
+                                <ul class="space-y-2 text-sm text-green-800">
+                                    <li class="flex items-start">
+                                        <input type="checkbox" class="mt-1 mr-2 w-4 h-4 text-green-600">
+                                        <span>I copied the redirect URI using the COPY button above</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <input type="checkbox" class="mt-1 mr-2 w-4 h-4 text-green-600">
+                                        <span>I pasted it into LinkedIn's "Redirect URLs" field WITHOUT any changes</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <input type="checkbox" class="mt-1 mr-2 w-4 h-4 text-green-600">
+                                        <span>I clicked "Add" to add the URL to the list</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <input type="checkbox" class="mt-1 mr-2 w-4 h-4 text-green-600">
+                                        <span>I clicked "Update" at the bottom to SAVE the changes</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <input type="checkbox" class="mt-1 mr-2 w-4 h-4 text-green-600">
+                                        <span>I see the URL in the "Redirect URLs" list in my LinkedIn app</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Continue Button -->
+                            <div class="flex justify-end mt-6">
+                                <button @click="completeStep(5)"
+                                        class="px-8 py-4 bg-green-600 text-white font-bold text-lg rounded-lg hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl">
+                                    ✓ Redirect URI Added & Verified →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Enter Your Credentials - IMPROVED WITH READ-ONLY REDIRECT URI -->
+                <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                     :class="currentStep === 5 ? 'border-blue-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                    <button @click="toggleStep(5)"
+                            :disabled="!stepCompleted[5]"
+                            class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div :class="[
+                                'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                                stepCompleted[5] ? 'bg-green-500 text-white' :
+                                currentStep === 5 ? 'bg-blue-600 text-white' :
+                                'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[5]" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>5</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">Enter Your Credentials</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Connect your LinkedIn app to our platform</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-blue-600 font-medium">~1 minute</span>
+                                    <span v-if="stepCompleted[5]" class="text-xs text-green-600 font-medium flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                             :class="{ 'rotate-180': expandedSteps[5] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[5]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                        <div class="pt-4 sm:pt-6 space-y-4">
+                            <div class="prose prose-sm max-w-none">
+                                <p class="text-sm sm:text-base text-gray-700">
+                                    Paste your LinkedIn credentials below. We'll encrypt and store them securely.
+                                </p>
+                            </div>
+
+                            <!-- Credentials Form -->
+                            <div class="space-y-4">
+                                <!-- Redirect URI (READ-ONLY) - NEW FIELD -->
+                                <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                                    <label class="block text-sm font-bold text-blue-900 mb-2 flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Your Redirect URI (do not change)
+                                    </label>
+                                    <input type="text"
+                                           :value="redirectUri"
+                                           readonly
+                                           class="w-full px-4 py-3 bg-gray-100 border-2 border-gray-300 rounded-lg font-mono text-sm text-gray-700 cursor-not-allowed opacity-75">
+                                    <p class="mt-2 text-xs text-blue-800 flex items-start">
+                                        <svg class="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>This must match EXACTLY what you added in Step 4. If you see a mismatch error later, go back to Step 4 and verify the URL.</span>
+                                    </p>
+                                </div>
+
+                                <!-- Client ID -->
+                                <div>
+                                    <label for="clientId" class="block text-sm font-semibold text-gray-900 mb-2">
+                                        Client ID
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text"
+                                           id="clientId"
+                                           v-model="credentials.clientId"
+                                           @input="validateClientIdFormat"
+                                           placeholder="Enter your LinkedIn Client ID (e.g., 86abc...xyz123)"
+                                           class="w-full px-4 py-3 border-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                           :class="credentialValidation.clientId === false ? 'border-red-300 bg-red-50' : credentialValidation.clientId === true ? 'border-green-300 bg-green-50' : 'border-gray-300'">
+                                    <p v-if="credentialValidation.clientId === false" class="mt-1 text-xs text-red-600">
+                                        Client ID should be a long alphanumeric string
+                                    </p>
+                                    <p v-if="credentialValidation.clientId === true" class="mt-1 text-xs text-green-600 flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Looks good!
+                                    </p>
+                                </div>
+
+                                <!-- Client Secret -->
+                                <div>
+                                    <label for="clientSecret" class="block text-sm font-semibold text-gray-900 mb-2">
+                                        Client Secret
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input :type="showClientSecret ? 'text' : 'password'"
+                                               id="clientSecret"
+                                               v-model="credentials.clientSecret"
+                                               @input="validateClientSecretFormat"
+                                               placeholder="Enter your LinkedIn Client Secret"
+                                               class="w-full px-4 py-3 pr-12 border-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                               :class="credentialValidation.clientSecret === false ? 'border-red-300 bg-red-50' : credentialValidation.clientSecret === true ? 'border-green-300 bg-green-50' : 'border-gray-300'">
+                                        <button type="button"
+                                                @click="showClientSecret = !showClientSecret"
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                            <svg v-if="showClientSecret" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                            <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <p v-if="credentialValidation.clientSecret === false" class="mt-1 text-xs text-red-600">
+                                        Client Secret should be a long alphanumeric string
+                                    </p>
+                                    <p v-if="credentialValidation.clientSecret === true" class="mt-1 text-xs text-green-600 flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Looks good!
+                                    </p>
+                                </div>
+
+                                <!-- Verify Settings Button - NEW -->
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-gray-900 mb-2">Double-check before saving:</h4>
+                                    <button @click="verifySettings"
+                                            type="button"
+                                            class="w-full py-2 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center justify-center gap-2 text-sm">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Verify My Settings (check console)
+                                    </button>
+                                    <p class="text-xs text-gray-600 mt-2">
+                                        This will log your settings to the browser console so you can verify them before saving
+                                    </p>
+                                </div>
+                                <!-- Test Configuration Button - NEW -->
+                                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-indigo-900 mb-2 flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Test Your Configuration
+                                    </h4>
+                                    <p class="text-xs text-indigo-700 mb-3">
+                                        Test your credentials before attempting OAuth connection
+                                    </p>
+                                    <button @click="testConfiguration"
+                                            :disabled="testingConfig || !credentials.clientId || !credentials.clientSecret"
+                                            type="button"
+                                            class="w-full py-3 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <svg v-if="testingConfig" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                        </svg>
+                                        <span v-if="testingConfig">Testing...</span>
+                                        <span v-else>Test Configuration</span>
+                                    </button>
+
+                                    <!-- Test Results -->
+                                    <div v-if="configTestResult" class="mt-3 rounded-lg p-3" :class="{
+                                        'bg-green-100 border-2 border-green-300': configTestResult.type === 'success',
+                                        'bg-yellow-100 border-2 border-yellow-300': configTestResult.type === 'warning',
+                                        'bg-red-100 border-2 border-red-300': configTestResult.type === 'error'
+                                    }">
+                                        <h5 class="font-bold text-sm mb-2 flex items-center" :class="{
+                                            'text-green-800': configTestResult.type === 'success',
+                                            'text-yellow-800': configTestResult.type === 'warning',
+                                            'text-red-800': configTestResult.type === 'error'
+                                        }">
+                                            <svg v-if="configTestResult.success" class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <svg v-else class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                            </svg>
+                                            {{ configTestResult.title }}
+                                        </h5>
+                                        <p class="text-xs mb-2" :class="{
+                                            'text-green-700': configTestResult.type === 'success',
+                                            'text-yellow-700': configTestResult.type === 'warning',
+                                            'text-red-700': configTestResult.type === 'error'
+                                        }">
+                                            {{ configTestResult.message }}
+                                        </p>
+                                        <ul class="text-xs space-y-1" :class="{
+                                            'text-green-700': configTestResult.type === 'success',
+                                            'text-yellow-700': configTestResult.type === 'warning',
+                                            'text-red-700': configTestResult.type === 'error'
+                                        }">
+                                            <li v-for="(item, index) in configTestResult.items" :key="index" class="flex items-start">
+                                                <span class="mr-2">•</span>
+                                                <span>{{ item }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div v-if="credentialSaveError" class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                                    <p class="text-sm text-red-800">{{ credentialSaveError }}</p>
+                                </div>
+
+                                <!-- Success Message -->
+                                <div v-if="credentialsSaved" class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                                    <p class="text-sm text-green-800 flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Credentials saved successfully and encrypted!
+                                    </p>
+                                </div>
+
+                                <!-- Save Button -->
+                                <button @click="saveCredentials"
+                                        :disabled="savingCredentials || !credentials.clientId || !credentials.clientSecret"
+                                        class="w-full py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                    <svg v-if="savingCredentials" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span v-if="savingCredentials">Saving...</span>
+                                    <span v-else-if="credentialsSaved">Saved - Click to Continue →</span>
+                                    <span v-else>Save Credentials</span>
+                                </button>
+                            </div>
+
+                            <!-- Security Notice -->
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                                <h4 class="text-sm font-semibold text-blue-900 mb-2 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Your credentials are secure
+                                </h4>
+                                <p class="text-xs sm:text-sm text-blue-800">
+                                    We encrypt your Client Secret using AES-256 encryption before storing it. Your credentials are never shared or visible to anyone else.
+                                </p>
+                            </div>
+
+                            <!-- Continue Button (only show if saved) -->
+                            <div v-if="credentialsSaved" class="flex justify-end mt-6">
+                                <button @click="completeStep(6)"
+                                        class="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg">
+                                    Continue to OAuth →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 7: Connect & Verify - ADDED TROUBLESHOOTING SECTION -->
+                <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                     :class="currentStep === 7 ? 'border-blue-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                    <button @click="toggleStep(6)"
+                            :disabled="!stepCompleted[6]"
+                            class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div :class="[
+                                'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                                stepCompleted[7] ? 'bg-green-500 text-white' :
+                                currentStep === 6 ? 'bg-blue-600 text-white' :
+                                'bg-gray-200 text-gray-600'
+                            ]">
+                                <svg v-if="stepCompleted[6]" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span v-else>7</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">Connect & Verify</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Authorize access to your LinkedIn account</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-blue-600 font-medium">~1 minute</span>
+                                    <span v-if="stepCompleted[6]" class="text-xs text-green-600 font-medium flex items-center">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                             :class="{ 'rotate-180': expandedSteps[7] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div v-show="expandedSteps[6]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                        <div class="pt-4 sm:pt-6 space-y-4">
+                            <div class="prose prose-sm max-w-none">
+                                <p class="text-sm sm:text-base text-gray-700">
+                                    Now that your app credentials are saved, let's connect your LinkedIn account using OAuth.
+                                </p>
+                            </div>
+
+                            <!-- OAuth Error Troubleshooting - NEW SECTION -->
+                            <div v-if="showOAuthError" class="bg-yellow-50 border-l-4 border-yellow-400 p-5 rounded-r-lg">
+                                <h4 class="text-base font-bold text-yellow-800 mb-3 flex items-center">
+                                    <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                    OAuth Connection Failed?
+                                </h4>
+                                <p class="text-sm text-yellow-800 mb-3">Common issues and how to fix them:</p>
+                                <ul class="space-y-2 text-sm text-yellow-800 ml-5 list-disc">
+                                    <li>
+                                        <strong>Redirect URI mismatch:</strong> The #1 cause of OAuth failures.
+                                        <button @click="goBackToStep(4)" class="ml-2 text-blue-600 hover:text-blue-800 underline font-semibold">
+                                            Go back to Step 4
+                                        </button>
+                                        and verify the exact URL in your LinkedIn app settings.
+                                    </li>
+                                    <li>
+                                        <strong>LinkedIn app not approved:</strong> Check if your app is in "Development" mode and has the required permissions (Sign In with LinkedIn, Share on LinkedIn).
+                                    </li>
+                                    <li>
+                                        <strong>Wrong credentials:</strong> Verify your Client ID and Secret are correct.
+                                        <button @click="goBackToStep(5)" class="ml-2 text-blue-600 hover:text-blue-800 underline font-semibold">
+                                            Go back to Step 5
+                                        </button>
+                                        to re-enter them.
+                                    </li>
+                                    <li>
+                                        <strong>Popup blocked:</strong> Make sure your browser allows popups for this site.
+                                    </li>
+                                </ul>
+                                <div class="mt-4 pt-3 border-t border-yellow-300">
+                                    <p class="text-sm text-yellow-900 font-semibold">Need to start over?</p>
+                                    <div class="flex gap-2 mt-2">
+                                        <button @click="goBackToStep(4)" class="px-4 py-2 bg-yellow-200 text-yellow-900 rounded-lg hover:bg-yellow-300 transition-colors text-sm font-medium">
+                                            ← Back to Step 4 (Redirect URI)
+                                        </button>
+                                        <button @click="goBackToStep(5)" class="px-4 py-2 bg-yellow-200 text-yellow-900 rounded-lg hover:bg-yellow-300 transition-colors text-sm font-medium">
+                                            ← Back to Step 5 (Credentials)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connection Status -->
+                            <div v-if="!isConnected" class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg">
+                                <h4 class="text-sm font-semibold text-yellow-900 mb-2 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Not Connected
+                                </h4>
+                                <p class="text-xs sm:text-sm text-yellow-800">
+                                    Click the button below to connect your LinkedIn account
+                                </p>
+                            </div>
+
+                            <div v-if="isConnected" class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                                <h4 class="text-sm font-semibold text-green-900 mb-2 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Connected Successfully!
+                                </h4>
+                                <p class="text-xs sm:text-sm text-green-800">
+                                    Your LinkedIn account is connected and ready to post
+                                </p>
+                            </div>
+
+                            <!-- What will happen -->
+                            <div v-if="!isConnected" class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-4 sm:p-6 border border-gray-200">
+                                <h4 class="text-sm font-semibold text-gray-900 mb-3">What will happen:</h4>
+                                <ol class="space-y-2 text-xs sm:text-sm text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+                                        <span>A LinkedIn popup window will open</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+                                        <span>You'll be asked to authorize "AI News Hub"</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+                                        <span>You'll see what permissions we're requesting</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
+                                        <span>Click "Allow" to grant access</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">5</span>
+                                        <span>You'll be redirected back here automatically</span>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <!-- Connect Button -->
+                            <button v-if="!isConnected"
+                                    @click="connectLinkedIn"
+                                    :disabled="connecting"
+                                    class="w-full py-4 px-6 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-base">
+                                <svg v-if="connecting" class="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <svg v-else class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                </svg>
+                                <span v-if="connecting">Opening LinkedIn...</span>
+                                <span v-else>Connect LinkedIn Account</span>
+                            </button>
+
+                            <!-- Cancel Button (shown while connecting) -->
+                            <button v-if="!isConnected && connecting"
+                                    @click="cancelConnection"
+                                    class="w-full py-3 px-6 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-3">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>Cancel</span>
+                            </button>
+
+                            <!-- Test Connection Button (only show when connected) -->
+                            <button v-if="isConnected"
+                                    @click="testConnection"
+                                    :disabled="testing"
+                                    class="w-full py-3 px-6 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                <svg v-if="testing" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span v-if="testing">Testing connection...</span>
+                                <span v-else>Test Connection</span>
+                            </button>
+
+                            <!-- Test Result -->
+                            <div v-if="testResult" :class="[
+                                'border-l-4 p-4 rounded-r-lg',
+                                testResult.success ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'
+                            ]">
+                                <p :class="[
+                                    'text-sm flex items-start',
+                                    testResult.success ? 'text-green-800' : 'text-red-800'
+                                ]">
+                                    <svg v-if="testResult.success" class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <svg v-else class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                    {{ testResult.message }}
+                                </p>
+                                <div v-if="!testResult.success" class="mt-2">
+                                    <button @click="showOAuthError = true" class="text-sm text-red-700 hover:text-red-900 underline font-semibold">
+                                        Show troubleshooting tips
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Security Notice -->
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                                <h4 class="text-sm font-semibold text-blue-900 mb-2 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Your account is secure
+                                </h4>
+                                <p class="text-xs sm:text-sm text-blue-800">
+                                    We use industry-standard OAuth 2.0 encryption. Your credentials are never stored or shared. You can revoke access anytime from your LinkedIn settings.
+                                </p>
+                            </div>
+
+                            <!-- Finish Button (only show when connected and tested) -->
+                            <div v-if="isConnected && testResult && testResult.success" class="flex justify-center mt-6">
+                                <button @click="completeSetup"
+                                        class="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl flex items-center gap-3">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Complete Setup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <transition name="slide-in">
+            <div v-if="toast.show" class="toast">
+                <div :class="[
+                    'px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 max-w-sm',
+                    toast.type === 'success' ? 'bg-green-600 text-white' :
+                    toast.type === 'error' ? 'bg-red-600 text-white' :
+                    'bg-blue-600 text-white'
+                ]">
+                    <svg v-if="toast.type === 'success'" class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <svg v-else-if="toast.type === 'error'" class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-sm font-medium">{{ toast.message }}</span>
+                </div>
+            </div>
+        </transition>
+    </div>
+
+    <script type="module" src="setup-linkedin.js"></script>
+</body>
+</html>

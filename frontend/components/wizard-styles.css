@@ -1,0 +1,255 @@
+/**
+ * Twitter OAuth Setup Wizard - Custom Styles
+ *
+ * Additional animations and styles that complement Tailwind CSS
+ * for a polished, professional wizard experience.
+ */
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Slow Bounce for Success State */
+@keyframes bounceSlow {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-bounce-slow {
+    animation: bounceSlow 2s ease-in-out infinite;
+}
+
+/* Smooth Modal Entry */
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-enter {
+    animation: modalSlideUp 0.3s ease-out;
+}
+
+/* Progress Bar Fill Animation */
+@keyframes progressFill {
+    from {
+        width: 0%;
+    }
+}
+
+.progress-fill {
+    animation: progressFill 0.6s ease-out;
+}
+
+/* Checkmark Draw Animation */
+@keyframes checkmarkDraw {
+    0% {
+        stroke-dasharray: 0, 100;
+    }
+    100% {
+        stroke-dasharray: 100, 0;
+    }
+}
+
+.checkmark-draw {
+    animation: checkmarkDraw 0.5s ease-out forwards;
+}
+
+/* Pulse for Important Elements */
+@keyframes subtlePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+}
+
+.subtle-pulse {
+    animation: subtlePulse 2s ease-in-out infinite;
+}
+
+/* Smooth Transitions */
+.smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus States for Accessibility */
+.wizard-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+}
+
+.wizard-button:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Custom Scrollbar for Modal Content */
+.wizard-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.wizard-scroll::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+
+.wizard-scroll::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.wizard-scroll::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+    .wizard-title {
+        font-size: 1.5rem;
+    }
+
+    .wizard-subtitle {
+        font-size: 0.875rem;
+    }
+}
+
+/* Loading State */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.loading-shimmer {
+    background: linear-gradient(
+        90deg,
+        #f3f4f6 0%,
+        #e5e7eb 50%,
+        #f3f4f6 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Success Confetti Effect (Optional) */
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100%) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.confetti {
+    animation: confetti-fall 3s ease-in forwards;
+}
+
+/* Gradient Text for Headers */
+.gradient-text {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Card Hover Effects */
+.wizard-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wizard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+                0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Optimization */
+@media (max-width: 640px) {
+    /* Full screen wizard on mobile */
+    .wizard-modal {
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    /* Larger touch targets */
+    .wizard-button {
+        min-height: 44px;
+        font-size: 1rem;
+    }
+
+    /* Better mobile spacing */
+    .wizard-content {
+        padding: 1rem;
+    }
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+    .wizard-dark {
+        background-color: #1f2937;
+        color: #f9fafb;
+    }
+
+    .wizard-dark .border-gray-200 {
+        border-color: #374151;
+    }
+
+    .wizard-dark .bg-gray-50 {
+        background-color: #111827;
+    }
+}
+
+/* Print Styles (for documentation) */
+@media print {
+    .wizard-modal {
+        position: static;
+        box-shadow: none;
+    }
+
+    .wizard-button {
+        display: none;
+    }
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

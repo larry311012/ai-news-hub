@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Articles - AI News Hub</title>
+    <style>
+        /* Animation keyframes */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes bookmarkRemove {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2) rotate(5deg);
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        .bookmark-remove {
+            animation: bookmarkRemove 0.3s ease-in-out;
+        }
+    </style>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <div class="flex-shrink-0 flex items-center">
+                            <a href="index.html" class="text-2xl font-bold text-indigo-600">AI News Hub</a>
+                        </div>
+                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                            <a href="index.html"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm font-medium">
+                                News Feed
+                            </a>
+                            <a href="saved.html"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 border-indigo-500 text-gray-900 text-sm font-medium">
+                                Saved
+                                <span v-if="savedCount > 0"
+                                      class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-indigo-600 rounded-full">
+                                    {{ savedCount }}
+                                </span>
+                            </a>
+                            <a href="index.html?view=history"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm font-medium">
+                                History
+                            </a>
+                            <a href="/feed-management-with-modal.html"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm font-medium">
+                                Source Management
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <!-- User Menu -->
+                        <div v-if="isAuthenticated" class="relative user-menu-container">
+                            <button @click="toggleUserMenu"
+                                    class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rounded-md px-2 py-1">
+                                <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-medium">
+                                    {{ getUserInitials(currentUser.full_name) }}
+                                </div>
+                                <span class="hidden md:block text-sm font-medium">{{ currentUser.full_name }}</span>
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div v-if="showUserMenu"
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                                <div class="py-1">
+                                    <div class="px-4 py-2 border-b border-gray-200">
+                                        <p class="text-sm font-medium text-gray-900">{{ currentUser.full_name }}</p>
+                                        <p class="text-xs text-gray-500 truncate">{{ currentUser.email }}</p>
+                                    </div>
+                                    <a href="profile.html"
+                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        Profile Settings
+                                    </a>
+                                    <button @click="logout"
+                                            class="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50">
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div class="sm:hidden border-t border-gray-200">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="index.html"
+                       class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 text-base font-medium">
+                        News Feed
+                    </a>
+                    <a href="saved.html"
+                       class="flex items-center justify-between pl-3 pr-4 py-2 border-l-4 bg-indigo-50 border-indigo-500 text-indigo-700 text-base font-medium">
+                        <span>Saved Articles</span>
+                        <span v-if="savedCount > 0"
+                              class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-indigo-600 rounded-full">
+                            {{ savedCount }}
+                        </span>
+                    </a>
+                    <a href="index.html?view=history"
+                       class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 text-base font-medium">
+                        History
+                    </a>
+                    <a href="/feed-management-with-modal.html"
+                       class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 text-base font-medium">
+                        Source Management
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Saved Articles</h1>
+                        <p class="mt-2 text-sm text-gray-600">
+                            Articles you've bookmarked for later reading
+                        </p>
+                    </div>
+                    <a href="index.html"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back to Feed
+                    </a>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button @click="currentFilter = 'all'"
+                                :class="currentFilter === 'all' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            All
+                            <span :class="currentFilter === 'all' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-900'"
+                                  class="ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                                {{ stats.all }}
+                            </span>
+                        </button>
+                        <button @click="currentFilter = 'today'"
+                                :class="currentFilter === 'today' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Today
+                            <span :class="currentFilter === 'today' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-900'"
+                                  class="ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                                {{ stats.today }}
+                            </span>
+                        </button>
+                        <button @click="currentFilter = 'week'"
+                                :class="currentFilter === 'week' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            This Week
+                            <span :class="currentFilter === 'week' ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-900'"
+                                  class="ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                                {{ stats.week }}
+                            </span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div v-if="loading" class="flex justify-center items-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="!loading && savedArticles.length === 0" class="text-center py-12 slide-in">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">No saved articles</h3>
+                <p class="mt-2 text-sm text-gray-500">
+                    {{ currentFilter === 'all' ? 'Start saving articles to read them later.' : `No articles saved ${currentFilter === 'today' ? 'today' : 'this week'}.` }}
+                </p>
+                <div class="mt-6">
+                    <a href="index.html"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Browse Articles
+                    </a>
+                </div>
+            </div>
+
+            <!-- Articles Grid -->
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="article in savedArticles"
+                     :key="article.id"
+                     class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow fade-in relative">
+
+                    <!-- Remove Bookmark Button -->
+                    <button @click="unsaveArticle(article.id)"
+                            :class="removingArticle === article.id ? 'bookmark-remove' : ''"
+                            class="absolute top-4 right-4 p-2 rounded-full hover:bg-red-50 transition-colors z-10 group"
+                            title="Remove from saved">
+                        <!-- Heroicon: bookmark-solid with trash on hover -->
+                        <svg class="w-6 h-6 text-indigo-600 group-hover:hidden"
+                             fill="currentColor"
+                             viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" clip-rule="evenodd" />
+                        </svg>
+                        <svg class="w-6 h-6 text-red-600 hidden group-hover:block"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                  :class="getCategoryColor(article.category)">
+                                {{ article.category }}
+                            </span>
+                            <!-- Spacer for remove button -->
+                            <div class="w-10"></div>
+                        </div>
+
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                            {{ article.title }}
+                        </h3>
+
+                        <p class="text-sm text-gray-600 mb-4 line-clamp-3">
+                            {{ getDisplaySummary(article) }}
+                        </p>
+
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span class="truncate">{{ article.source }}</span>
+                            <span>{{ formatDate(article.published) }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs text-gray-400 mb-4">
+                            <span>Saved {{ formatSaveDate(article.saved_at) }}</span>
+                        </div>
+
+                        <div class="flex space-x-2">
+                            <a :href="article.url"
+                               target="_blank"
+                               @click="trackArticleView(article)"
+                               class="flex-1 px-3 py-2 text-sm font-medium text-center text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors">
+                                Read Article
+                            </a>
+                            <button @click="selectForGeneration(article)"
+                                    class="px-3 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="saved.js"></script>
+</body>
+</html>

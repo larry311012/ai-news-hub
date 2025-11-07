@@ -1,0 +1,45 @@
+{
+  "name": "ai-post-generator-frontend",
+  "version": "1.0.0",
+  "description": "AI Post Generator Frontend with Vite",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:prod": "NODE_ENV=production vite build",
+    "build:analyze": "ANALYZE=true vite build",
+    "preview": "vite preview",
+    "lint": "eslint *.js --max-warnings 0",
+    "lint:fix": "eslint *.js --fix",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch",
+    "analyze": "ANALYZE=true vite build"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "@vue/compiler-sfc": "^3.4.0",
+    "terser": "^5.24.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-security": "^1.7.1",
+    "eslint-plugin-vue": "^9.19.2",
+    "vitest": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8",
+    "happy-dom": "^15.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/user-event": "^14.5.2",
+    "rollup-plugin-visualizer": "^5.12.0",
+    "vite-plugin-compression2": "^1.0.0"
+  }
+}

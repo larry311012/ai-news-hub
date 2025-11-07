@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI News Aggregator</title>
+    <!-- Analytics Client -->
+    <script type="module" src="analytics.js"></script>
+    <style>
+        /* Loading animation keyframes */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes checkmark {
+            0% {
+                stroke-dashoffset: 100;
+            }
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        @keyframes bookmarkBounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        .checkmark-path {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+        }
+        .checkmark-animate {
+            animation: checkmark 0.5s ease-out forwards;
+        }
+        .bookmark-bounce {
+            animation: bookmarkBounce 0.3s ease-in-out;
+        }
+        /* Fade transitions */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <div class="flex-shrink-0 flex items-center">
+                            <h1 class="text-2xl font-bold text-indigo-600">AI News Hub</h1>
+                        </div>
+                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                            <button @click="currentView = 'feed'"
+                                    :class="currentView === 'feed' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                News Feed
+                            </button>
+                            <a href="saved.html"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm font-medium relative">
+                                Saved
+                                <span v-if="savedCount > 0"
+                                      class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-indigo-600 rounded-full">
+                                    {{ savedCount }}
+                                </span>
+                            </a>
+                            <button @click="currentView = 'history'"
+                                    :class="currentView === 'history' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'"
+                                    class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                History
+                            </button>
+                            <a href="/feed-management-with-modal.html"
+                               class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 text-sm font-medium">
+                                Source Management
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="fetchArticles"
+                                :disabled="loading"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
+                            <span v-if="!loading">Refresh News</span>
+                            <span v-else>Loading...</span>
+                        </button>
+
+                        <!-- Profile Link -->
+                        <a href="profile.html"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Profile & Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div class="sm:hidden border-t border-gray-200">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <button @click="currentView = 'feed'"
+                            :class="currentView === 'feed' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'"
+                            class="block w-full text-left pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                        News Feed
+                    </button>
+                    <a href="saved.html"
+                       class="flex items-center justify-between pl-3 pr-4 py-2 border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 text-base font-medium">
+                        <span>Saved Articles</span>
+                        <span v-if="savedCount > 0"
+                              class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-indigo-600 rounded-full">
+                            {{ savedCount }}
+                        </span>
+                    </a>
+                    <button @click="currentView = 'history'"
+                            :class="currentView === 'history' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'"
+                            class="block w-full text-left pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                        History
+                    </button>
+                    <a href="/feed-management-with-modal.html"
+                       class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 text-base font-medium">
+                        Source Management
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Loading Screen for Post Generation -->
+        <div v-if="showGeneratingScreen"
+             class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center z-50">
+            <div class="max-w-2xl w-full mx-4">
+                <!-- Header -->
+                <div class="text-center mb-12 animate-slide-in">
+                    <h2 class="text-3xl font-bold text-white mb-2">Generating Your Posts</h2>
+                    <p class="text-gray-300">Creating engaging content for your selected platforms...</p>
+                </div>
+
+                <!-- Platform Progress Cards -->
+                <div class="space-y-4">
+                    <!-- LinkedIn -->
+                    <div class="bg-white rounded-lg p-6 shadow-xl animate-slide-in" style="animation-delay: 0.1s;">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">LinkedIn</h3>
+                                    <p class="text-sm text-gray-500">{{ generationStatus.linkedin }}</p>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <div v-if="platformStatus.linkedin === 'loading'" class="w-8 h-8">
+                                    <svg class="animate-spin text-blue-600" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                                <div v-else-if="platformStatus.linkedin === 'complete'" class="w-8 h-8">
+                                    <svg class="text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path class="checkmark-path checkmark-animate" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div v-else class="w-8 h-8">
+                                    <svg class="text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Twitter -->
+                    <div class="bg-white rounded-lg p-6 shadow-xl animate-slide-in" style="animation-delay: 0.2s;">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-sky-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Twitter</h3>
+                                    <p class="text-sm text-gray-500">{{ generationStatus.twitter }}</p>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <div v-if="platformStatus.twitter === 'loading'" class="w-8 h-8">
+                                    <svg class="animate-spin text-sky-500" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                                <div v-else-if="platformStatus.twitter === 'complete'" class="w-8 h-8">
+                                    <svg class="text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path class="checkmark-path checkmark-animate" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div v-else class="w-8 h-8">
+                                    <svg class="text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Threads -->
+                    <div class="bg-white rounded-lg p-6 shadow-xl animate-slide-in" style="animation-delay: 0.3s;">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.781 3.631 2.695 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 013.02.142l-.126 1.974a11.881 11.881 0 00-2.58-.123c-1.018.056-1.84.344-2.446.855-.583.493-.87 1.12-.834 1.814.036.683.388 1.217.99 1.502.539.255 1.277.354 2.101.28 1.15-.093 2.059-.535 2.702-1.315.646-.784.972-1.858.972-3.197V8.033c0-.458-.006-.916-.02-1.373l2.04-.057c.013.457.02.915.02 1.373v1.78c.598-.421 1.3-.758 2.092-.998 1.004-.304 2.085-.457 3.212-.457l.126 1.99c-.905 0-1.766.123-2.562.366-.796.243-1.47.6-2.004 1.062v1.304c.54.694.97 1.49 1.28 2.369.726 2.057.746 4.753-1.44 6.993-1.817 1.869-4.138 2.82-7.106 2.848z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Threads</h3>
+                                    <p class="text-sm text-gray-500">{{ generationStatus.threads }}</p>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <div v-if="platformStatus.threads === 'loading'" class="w-8 h-8">
+                                    <svg class="animate-spin text-purple-600" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                                <div v-else-if="platformStatus.threads === 'complete'" class="w-8 h-8">
+                                    <svg class="text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path class="checkmark-path checkmark-animate" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div v-else class="w-8 h-8">
+                                    <svg class="text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Message -->
+                <div class="text-center mt-8 animate-pulse">
+                    <p class="text-gray-300 text-sm">
+                        {{ generationProgressMessage }}
+                    </p>
+                </div>
+
+                <!-- Error State -->
+                <div v-if="generationError" class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4 animate-slide-in">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-red-400 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-medium text-red-800">Generation Failed</h4>
+                            <p class="text-sm text-red-700 mt-1">{{ generationError }}</p>
+                            <div class="mt-4 flex space-x-3">
+                                <button @click="retryGeneration"
+                                        class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700">
+                                    Try Again
+                                </button>
+                                <button @click="cancelGeneration"
+                                        class="px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-md border border-gray-300 hover:bg-gray-50">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeout Warning -->
+                <div v-if="showTimeoutWarning && !generationError" class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 animate-slide-in">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-yellow-400 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="text-sm font-medium text-yellow-800">Taking longer than expected</h4>
+                            <p class="text-sm text-yellow-700 mt-1">
+                                The AI is working on your content. This can take up to 2 minutes for high-quality results.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- News Feed View -->
+            <div v-if="currentView === 'feed'" class="space-y-6">
+                <!-- Filters -->
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                            <input v-model="filters.search"
+                                   @input="loadArticles"
+                                   type="text"
+                                   placeholder="Search articles..."
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select v-model="filters.category"
+                                    @change="loadArticles"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">All Categories</option>
+                                <option value="news">News</option>
+                                <option value="research">Research</option>
+                                <option value="company">Company</option>
+                                <option value="newsletter">Newsletter</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Source</label>
+                            <select v-model="filters.source"
+                                    @change="loadArticles"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">All Sources</option>
+                                <option v-for="source in uniqueSources" :key="source" :value="source">{{ source }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Filter</label>
+                            <select v-model="filters.bookmarked"
+                                    @change="loadArticles"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option :value="null">All Articles</option>
+                                <option :value="true">Bookmarked Only</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="text-sm font-medium text-gray-500">Total Articles</div>
+                        <div class="mt-1 text-3xl font-semibold text-gray-900">{{ filteredStats.total }}</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="text-sm font-medium text-gray-500">Categories</div>
+                        <div class="mt-1 text-3xl font-semibold text-indigo-600">
+                            {{ Object.keys(articlesByCategory).length }}
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="text-sm font-medium text-gray-500">Sources</div>
+                        <div class="mt-1 text-3xl font-semibold text-gray-900">{{ filteredStats.sources }}</div>
+                    </div>
+                </div>
+
+                <!-- Articles Grid - Grouped by Category -->
+                <div v-for="(categoryArticles, category) in displayArticles" :key="category" class="space-y-4">
+                    <!-- Category Header (only show when viewing all categories) -->
+                    <div v-if="shouldShowCategoryHeaders" class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-gray-900 capitalize">{{ category }}</h3>
+                        <span class="text-sm text-gray-500">
+                            Showing {{ categoryArticles.length }} of {{ articlesByCategory[category].length }} articles
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div v-for="article in categoryArticles"
+                             :key="article.id"
+                             class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow relative"
+                             :class="{'ring-2 ring-indigo-500': selectedArticles.includes(article.id)}">
+
+                            <!-- Bookmark Button - Top Right Corner -->
+                            <button @click.stop="saveArticle(article)"
+                                    :class="bookmarkAnimating === article.id ? 'bookmark-bounce' : ''"
+                                    class="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+                                    :title="article.is_saved ? 'Remove from saved' : 'Save article'">
+                                <!-- Heroicon: bookmark (solid when saved, outline when not) -->
+                                <svg v-if="article.is_saved"
+                                     class="w-6 h-6 text-purple-600"
+                                     fill="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" clip-rule="evenodd" />
+                                </svg>
+                                <svg v-else
+                                     class="w-6 h-6 text-gray-400 hover:text-purple-600"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                                </svg>
+                            </button>
+
+                            <div class="p-6">
+                                <div class="flex items-start justify-between mb-3">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                          :class="getCategoryColor(article.category)">
+                                        {{ article.category }}
+                                    </span>
+                                    <!-- Spacer for bookmark button -->
+                                    <div class="w-10"></div>
+                                </div>
+
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                                    {{ article.title }}
+                                </h3>
+
+                                <p class="text-sm text-gray-600 mb-4 line-clamp-3">
+                                    {{ getDisplaySummary(article) }}
+                                </p>
+
+                                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                    <span class="truncate">{{ article.source }}</span>
+                                    <span>{{ formatDate(article.published) }}</span>
+                                </div>
+
+                                <div class="flex space-x-2">
+                                    <button @click.stop="toggleSelect(article.id)"
+                                            :class="selectedArticles.includes(article.id) ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                            class="flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors">
+                                        {{ selectedArticles.includes(article.id) ? 'Selected' : 'Select' }}
+                                    </button>
+                                    <a :href="article.link"
+                                       target="_blank"
+                                       @click="trackArticleView(article)"
+                                       class="flex-1 px-3 py-2 text-sm font-medium text-center text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors">
+                                        Read More
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div v-if="!loading && articles.length === 0" class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+                    </svg>
+                    <p class="text-gray-500 text-lg mt-4">No articles found.</p>
+                    <p class="text-gray-400 text-sm mt-2">
+                        Click "Refresh News" to fetch articles.
+                    </p>
+                </div>
+
+                <!-- Generate Button (Fixed) -->
+                <div v-if="selectedArticles.length > 0"
+                     class="fixed bottom-8 right-8 bg-white rounded-lg shadow-2xl border-2 p-4 transition-all duration-300"
+                     :class="isGenerating ? 'border-purple-500 scale-105' : 'border-indigo-500'">
+                    <p class="text-sm text-gray-600 mb-2">{{ selectedArticles.length }} article(s) selected</p>
+                    <button @click="generatePosts"
+                            :disabled="isGenerating"
+                            class="w-full px-4 py-2 rounded-md font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center space-x-2"
+                            :class="isGenerating ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white cursor-wait' : 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95'">
+                        <!-- Spinner (shown when generating) -->
+                        <svg v-if="isGenerating" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <!-- Button Text -->
+                        <span>{{ generationButtonText }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- History View -->
+            <div v-if="currentView === 'history'" class="space-y-6">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Publishing History</h2>
+
+                    <div class="space-y-4">
+                        <div v-for="post in posts"
+                             :key="post.id"
+                             @click="editPost(post.id)"
+                             class="border border-gray-200 rounded-lg p-4 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">{{ post.article_title }}</h3>
+                                    <p class="text-sm text-gray-500">{{ formatDate(post.created_at) }}</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                      :class="getStatusColor(post.status)">
+                                    {{ post.status }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-2">
+                                    <span v-for="platform in post.platforms"
+                                          :key="platform"
+                                          class="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-700">
+                                        {{ platform }}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-gray-400 italic">Click to view/edit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="posts.length === 0" class="text-center py-12">
+                        <p class="text-gray-500">No publishing history yet.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

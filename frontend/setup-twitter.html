@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter/X Setup Guide - AI News Hub</title>
+    <style>
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+            20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes checkmark {
+            0% { transform: scale(0) rotate(-45deg); }
+            50% { transform: scale(1.2) rotate(-45deg); }
+            100% { transform: scale(1) rotate(-45deg); }
+        }
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            z-index: 9999;
+            animation: confetti-fall 3s linear forwards;
+            pointer-events: none;
+        }
+        .shake-animation {
+            animation: shake 0.4s ease-in-out;
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        .checkmark-animation {
+            animation: checkmark 0.4s ease-out;
+        }
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-gray-50">
+    <div id="setup-app">
+        <!-- Header -->
+        <div class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                <button @click="goBack" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors mb-3 sm:mb-4">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Profile
+                </button>
+
+                <!-- Hero Section -->
+                <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                    <!-- Twitter Logo -->
+                    <div class="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-black rounded-2xl flex items-center justify-center">
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </div>
+
+                    <div class="flex-1">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Connect Your Twitter/X Account</h1>
+                        <p class="mt-2 text-sm sm:text-base text-gray-600">Follow these 6 simple steps to set up automatic posting to Twitter</p>
+                        <div class="mt-3 sm:mt-4 flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+                            <span class="inline-flex items-center text-gray-500">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Total time: ~14 minutes
+                            </span>
+                            <span class="inline-flex items-center text-gray-500">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Difficulty: Easy
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar (Desktop) -->
+                <div class="hidden md:block mt-6">
+                    <div class="flex items-center justify-between">
+                        <div v-for="step in 6" :key="step" class="flex items-center" :class="step < 6 ? 'flex-1' : ''">
+                            <!-- Step Circle -->
+                            <div class="relative flex flex-col items-center">
+                                <div :class="[
+                                    'w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm z-10 transition-all duration-300',
+                                    stepCompleted[step] ? 'bg-green-500 text-white' :
+                                    currentStep === step ? 'bg-indigo-600 text-white ring-4 ring-indigo-200' :
+                                    currentStep > step ? 'bg-indigo-100 text-indigo-600' :
+                                    'bg-gray-200 text-gray-500'
+                                ]">
+                                    <svg v-if="stepCompleted[step]" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span v-else>{{ step }}</span>
+                                </div>
+                                <span :class="[
+                                    'absolute top-12 text-xs font-medium text-center w-24',
+                                    stepCompleted[step] || currentStep === step ? 'text-indigo-600' : 'text-gray-500'
+                                ]">{{ stepTitles[step - 1] }}</span>
+                            </div>
+
+                            <!-- Connecting Line -->
+                            <div v-if="step < 6" :class="[
+                                'h-1 flex-1 mx-2 transition-all duration-300',
+                                stepCompleted[step] ? 'bg-green-500' :
+                                currentStep > step ? 'bg-indigo-300' :
+                                'bg-gray-200'
+                            ]"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar (Mobile) -->
+                <div class="md:hidden mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700">Step {{ currentStep }} of {{ totalSteps }}</span>
+                        <span class="text-sm font-medium text-indigo-600">{{ Math.round(progress) }}% complete</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300" :style="{ width: progress + '%' }"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-4">
+            <!-- Step 1: Create Twitter Developer Account -->
+            <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                 :class="currentStep === 1 ? 'border-indigo-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                <button @click="toggleStep(1)"
+                        class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl">
+                    <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div :class="[
+                            'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                            stepCompleted[1] ? 'bg-green-500 text-white' :
+                            currentStep === 1 ? 'bg-indigo-600 text-white' :
+                            'bg-gray-200 text-gray-500'
+                        ]">
+                            <svg v-if="stepCompleted[1]" class="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span v-else>1</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900">Create Twitter Developer Account</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-indigo-600 font-medium">~3 minutes</span>
+                                <span v-if="stepCompleted[1]" class="text-xs text-green-600 font-medium flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Completed
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                         :class="{ 'rotate-180': expandedSteps[1] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div v-show="expandedSteps[1]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                    <div class="pt-4 sm:pt-6 space-y-4">
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-sm sm:text-base text-gray-700 mb-4">
+                                First, you need a Twitter Developer account to access the Twitter API. This is free and takes about 3 minutes.
+                            </p>
+
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-blue-800">
+                                            <strong>Important:</strong> You'll need your Twitter/X account credentials. If you don't have a Twitter account yet, create one first at
+                                            <a href="https://twitter.com/signup" target="_blank" class="underline font-semibold">twitter.com/signup</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <ol class="list-decimal list-inside space-y-3 text-sm sm:text-base">
+                                <li class="text-gray-700">
+                                    <strong>Visit the Developer Portal:</strong>
+                                    <a href="https://developer.twitter.com/en/portal/dashboard" target="_blank"
+                                       class="ml-2 inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                                        Open Developer Portal
+                                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="text-gray-700">
+                                    <strong>Sign in</strong> with your Twitter account credentials (the same one you use to tweet)
+                                </li>
+                                <li class="text-gray-700">
+                                    <strong>Complete the developer signup</strong> if this is your first time
+                                    <ul class="list-disc list-inside ml-6 mt-2 space-y-1 text-sm text-gray-600">
+                                        <li>Select "Hobbyist" or "Making a bot" as your use case</li>
+                                        <li>Describe: "Creating an automated social media posting tool"</li>
+                                        <li>Accept the Developer Agreement and Terms of Service</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+
+                        <button @click="completeStep(1)"
+                                class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold shadow-md hover:shadow-lg">
+                            I Have a Developer Account - Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Create a Project & App -->
+            <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                 :class="currentStep === 2 ? 'border-indigo-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                <button @click="toggleStep(2)"
+                        :disabled="!stepCompleted[1]"
+                        class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                    <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div :class="[
+                            'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                            stepCompleted[2] ? 'bg-green-500 text-white' :
+                            currentStep === 2 ? 'bg-indigo-600 text-white' :
+                            'bg-gray-200 text-gray-500'
+                        ]">
+                            <svg v-if="stepCompleted[2]" class="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span v-else>2</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900">Create a Project & App</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-indigo-600 font-medium">~5 minutes</span>
+                                <span v-if="stepCompleted[2]" class="text-xs text-green-600 font-medium flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Completed
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                         :class="{ 'rotate-180': expandedSteps[2] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div v-show="expandedSteps[2]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                    <div class="pt-4 sm:pt-6 space-y-4">
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-sm sm:text-base text-gray-700 mb-4">
+                                Now we'll create a new project and app in the Twitter Developer Portal.
+                            </p>
+
+                            <ol class="list-decimal list-inside space-y-3 text-sm sm:text-base">
+                                <li class="text-gray-700">
+                                    <strong>In the Developer Portal, click "Create Project"</strong>
+                                </li>
+                                <li class="text-gray-700">
+                                    <strong>Fill in the project details:</strong>
+                                    <ul class="list-disc list-inside ml-6 mt-2 space-y-1 text-sm text-gray-600">
+                                        <li><strong>Project name:</strong> "AI News Hub" (or any name you like)</li>
+                                        <li><strong>Use case:</strong> Select "Making a bot"</li>
+                                        <li><strong>Description:</strong> "Automated social media content posting"</li>
+                                    </ul>
+                                </li>
+                                <li class="text-gray-700">
+                                    <strong>Create an App within the project</strong>
+                                    <ul class="list-disc list-inside ml-6 mt-2 space-y-1 text-sm text-gray-600">
+                                        <li><strong>App name:</strong> "AI-News-Hub-Bot" (must be unique across all Twitter)</li>
+                                        <li>If the name is taken, try adding your username or a number</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <div class="ml-3">
+                                    <p class="text-sm text-yellow-800">
+                                        <strong>Note:</strong> Keep the Twitter Developer Portal tab open. You'll need it in the next steps to get your API keys.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button @click="completeStep(2)"
+                                class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold shadow-md hover:shadow-lg">
+                            I Created the Project & App - Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Get API Keys -->
+            <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                 :class="currentStep === 3 ? 'border-indigo-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                <button @click="toggleStep(3)"
+                        :disabled="!stepCompleted[2]"
+                        class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                    <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div :class="[
+                            'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                            stepCompleted[3] ? 'bg-green-500 text-white' :
+                            currentStep === 3 ? 'bg-indigo-600 text-white' :
+                            'bg-gray-200 text-gray-500'
+                        ]">
+                            <svg v-if="stepCompleted[3]" class="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span v-else>3</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900">Get Your API Keys</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-indigo-600 font-medium">~2 minutes</span>
+                                <span v-if="stepCompleted[3]" class="text-xs text-green-600 font-medium flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Completed
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                         :class="{ 'rotate-180': expandedSteps[3] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div v-show="expandedSteps[3]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                    <div class="pt-4 sm:pt-6 space-y-4">
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-sm sm:text-base text-gray-700 mb-4">
+                                Time to generate your API credentials. These are like passwords that allow our app to post on your behalf.
+                            </p>
+
+                            <ol class="list-decimal list-inside space-y-3 text-sm sm:text-base">
+                                <li class="text-gray-700">
+                                    <strong>In your app's settings, find "Keys and tokens"</strong>
+                                </li>
+                                <li class="text-gray-700">
+                                    <strong>Click "Regenerate" under "Consumer Keys"</strong>
+                                    <ul class="list-disc list-inside ml-6 mt-2 space-y-1 text-sm text-gray-600">
+                                        <li>You'll see an <strong>API Key</strong> (about 25 characters)</li>
+                                        <li>And an <strong>API Secret</strong> (about 50 characters)</li>
+                                    </ul>
+                                </li>
+                                <li class="text-gray-700">
+                                    <strong>IMPORTANT: Copy both keys immediately!</strong>
+                                    <ul class="list-disc list-inside ml-6 mt-2 space-y-1 text-sm text-gray-600">
+                                        <li>Save them in a secure note or password manager</li>
+                                        <li>You won't be able to see the API Secret again after closing this window</li>
+                                        <li>You'll need these in Step 5</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-semibold text-red-800">Keep Your Keys Secret!</h4>
+                                    <p class="text-sm text-red-700 mt-1">
+                                        Never share your API keys publicly or commit them to GitHub. Anyone with these keys can post to Twitter as you!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
+                            <summary class="text-sm font-semibold text-gray-900 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                What do these keys look like?
+                            </summary>
+                            <div class="mt-3 space-y-2 text-sm text-gray-600">
+                                <div class="bg-white p-3 rounded border border-gray-200">
+                                    <p class="font-semibold text-gray-700 mb-1">API Key (25 chars):</p>
+                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">xvz1evFS4wEEPTGEFPHBog</code>
+                                </div>
+                                <div class="bg-white p-3 rounded border border-gray-200">
+                                    <p class="font-semibold text-gray-700 mb-1">API Secret (50 chars):</p>
+                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded">L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg</code>
+                                </div>
+                            </div>
+                        </details>
+
+                        <button @click="completeStep(3)"
+                                class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold shadow-md hover:shadow-lg">
+                            I've Saved My API Keys - Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Set App Permissions & Callback URL -->
+            <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                 :class="currentStep === 4 ? 'border-indigo-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                <button @click="toggleStep(4)"
+                        :disabled="!stepCompleted[3]"
+                        class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                    <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div :class="[
+                            'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                            stepCompleted[4] ? 'bg-green-500 text-white' :
+                            currentStep === 4 ? 'bg-indigo-600 text-white' :
+                            'bg-gray-200 text-gray-500'
+                        ]">
+                            <svg v-if="stepCompleted[4]" class="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span v-else>4</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900">Configure App Settings</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-indigo-600 font-medium">~3 minutes</span>
+                                <span v-if="stepCompleted[4]" class="text-xs text-green-600 font-medium flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Completed
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                         :class="{ 'rotate-180': expandedSteps[4] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div v-show="expandedSteps[4]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                    <div class="pt-4 sm:pt-6 space-y-4">
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-sm sm:text-base text-gray-700 mb-4">
+                                Now we need to configure your app's permissions and callback URL so it can post tweets and complete the OAuth flow.
+                            </p>
+
+                            <div class="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-4 mb-4">
+                                <h4 class="text-sm font-semibold text-indigo-900 mb-2">Part A: Set App Permissions</h4>
+                                <ol class="list-decimal list-inside space-y-2 text-sm text-indigo-800">
+                                    <li>In your app's settings, click on <strong>"App permissions"</strong></li>
+                                    <li>Click <strong>"Edit"</strong> and select <strong>"Read and write"</strong></li>
+                                    <li>Click <strong>"Save"</strong></li>
+                                </ol>
+                            </div>
+
+                            <div class="bg-purple-50 border-2 border-purple-200 rounded-lg p-4">
+                                <h4 class="text-sm font-semibold text-purple-900 mb-2">Part B: Add Callback URL</h4>
+                                <ol class="list-decimal list-inside space-y-2 text-sm text-purple-800">
+                                    <li>Find <strong>"App settings"</strong> or <strong>"Authentication settings"</strong></li>
+                                    <li>Click <strong>"Set up"</strong> or <strong>"Edit"</strong></li>
+                                    <li>Enable <strong>"OAuth 1.0a"</strong></li>
+                                    <li>In the <strong>"Callback URL"</strong> field, paste this URL:</li>
+                                </ol>
+
+                                <div class="mt-3 relative">
+                                    <input type="text"
+                                           :value="callbackUrl"
+                                           readonly
+                                           class="w-full px-4 py-3 pr-24 bg-white border-2 border-purple-300 rounded-lg font-mono text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 select-all">
+                                    <button @click="copyCallbackUrl"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-purple-600 text-white text-xs font-semibold rounded-md hover:bg-purple-700 transition-colors">
+                                        <span v-if="!callbackCopied">Copy</span>
+                                        <span v-else class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                            Copied
+                                        </span>
+                                    </button>
+                                </div>
+
+                                <p class="mt-2 text-xs text-purple-700">
+                                    <strong>Note:</strong> This callback URL tells Twitter where to send users after they authorize your app.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-semibold text-green-800">Almost there!</h4>
+                                    <p class="text-sm text-green-700 mt-1">
+                                        After saving these settings, you're ready to enter your API keys in our platform.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
+                            <summary class="text-sm font-semibold text-gray-900 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Troubleshooting: Can't find these settings?
+                            </summary>
+                            <div class="mt-3 space-y-2 text-sm text-gray-600">
+                                <p><strong>Can't find "App permissions"?</strong></p>
+                                <ul class="list-disc list-inside ml-4 space-y-1">
+                                    <li>Look for "Settings" or "User authentication settings"</li>
+                                    <li>Try going to Projects & Apps > Your App > Settings</li>
+                                </ul>
+                                <p class="mt-2"><strong>Can't enable OAuth 1.0a?</strong></p>
+                                <ul class="list-disc list-inside ml-4 space-y-1">
+                                    <li>Make sure you're in "Authentication settings"</li>
+                                    <li>OAuth 1.0a should be under "User authentication set up"</li>
+                                </ul>
+                            </div>
+                        </details>
+
+                        <button @click="completeStep(4)"
+                                class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold shadow-md hover:shadow-lg">
+                            I've Added the Callback URL - Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Enter Keys in Our Platform -->
+            <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                 :class="currentStep === 5 ? 'border-indigo-500 shadow-lg' : 'border-gray-200 shadow-sm'"
+                 data-step="5">
+                <button @click="toggleStep(5)"
+                        :disabled="!stepCompleted[4]"
+                        class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                    <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div :class="[
+                            'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                            stepCompleted[5] ? 'bg-green-500 text-white' :
+                            currentStep === 5 ? 'bg-indigo-600 text-white' :
+                            'bg-gray-200 text-gray-500'
+                        ]">
+                            <svg v-if="stepCompleted[5]" class="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span v-else>5</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900">Enter Your API Keys</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-indigo-600 font-medium">~1 minute</span>
+                                <span v-if="stepCompleted[5]" class="text-xs text-green-600 font-medium flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Completed
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                         :class="{ 'rotate-180': expandedSteps[5] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div v-show="expandedSteps[5]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                    <div class="pt-4 sm:pt-6 space-y-4">
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-sm sm:text-base text-gray-700">
+                                Now paste the API keys you saved in Step 3 into the form below.
+                            </p>
+                        </div>
+
+                        <!-- API Key Form -->
+                        <form @submit.prevent="saveCredentials" class="space-y-4">
+                            <!-- API Key Input -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                    Twitter API Key
+                                </label>
+                                <div class="relative">
+                                    <input type="text"
+                                           v-model="apiKeys.apiKey"
+                                           placeholder="Enter your 25-character API Key"
+                                           class="w-full px-4 py-3 pr-10 border-2 rounded-lg font-mono text-sm transition-all"
+                                           :class="apiKeyValidation.apiKey === true ? 'border-green-500 focus:ring-green-500 focus:border-green-500' :
+                                                   apiKeyValidation.apiKey === false ? 'border-red-500 focus:ring-red-500 focus:border-red-500' :
+                                                   'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'"
+                                           @input="validateApiKeyFormat">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <svg v-if="apiKeyValidation.apiKey === true" class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <svg v-else-if="apiKeyValidation.apiKey === false" class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p v-if="apiKeyValidation.apiKey === false" class="mt-1 text-xs text-red-600">
+                                    API Key should be around 25 characters long
+                                </p>
+                            </div>
+
+                            <!-- API Secret Input -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                    Twitter API Secret
+                                </label>
+                                <div class="relative">
+                                    <input :type="showApiSecret ? 'text' : 'password'"
+                                           v-model="apiKeys.apiSecret"
+                                           placeholder="Enter your 50-character API Secret"
+                                           class="w-full px-4 py-3 pr-20 border-2 rounded-lg font-mono text-sm transition-all"
+                                           :class="apiKeyValidation.apiSecret === true ? 'border-green-500 focus:ring-green-500 focus:border-green-500' :
+                                                   apiKeyValidation.apiSecret === false ? 'border-red-500 focus:ring-red-500 focus:border-red-500' :
+                                                   'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'"
+                                           @input="validateApiSecretFormat">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-2">
+                                        <button type="button"
+                                                @click="showApiSecret = !showApiSecret"
+                                                class="text-gray-400 hover:text-gray-600">
+                                            <svg v-if="showApiSecret" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        </button>
+                                        <svg v-if="apiKeyValidation.apiSecret === true" class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <svg v-else-if="apiKeyValidation.apiSecret === false" class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p v-if="apiKeyValidation.apiSecret === false" class="mt-1 text-xs text-red-600">
+                                    API Secret should be around 50 characters long
+                                </p>
+                            </div>
+
+                            <!-- Validation Error -->
+                            <div v-if="keyValidationError" class="bg-red-50 border-l-4 border-red-500 p-4 shake-animation">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <p class="ml-3 text-sm text-red-800">{{ keyValidationError }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Save Credentials Button -->
+                            <button v-if="!credentialsSaved"
+                                    type="submit"
+                                    :disabled="savingCredentials || !apiKeys.apiKey || !apiKeys.apiSecret"
+                                    class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                <svg v-if="savingCredentials" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>{{ savingCredentials ? 'Saving Credentials...' : 'Save Credentials' }}</span>
+                            </button>
+                        </form>
+
+                        <!-- Credentials Saved - Test Connection Section -->
+                        <div v-if="credentialsSaved" class="space-y-4">
+                            <!-- Status Info (not a success message, just showing current state) -->
+                            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <svg class="w-6 h-6 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        <div class="ml-3">
+                                            <h4 class="text-sm font-semibold text-blue-800">Credentials Configured</h4>
+                                            <p class="text-sm text-blue-700 mt-1">
+                                                Your API keys are encrypted and stored securely.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-shrink-0">
+                                        <button @click="resetCredentials"
+                                                class="px-4 py-2 bg-white text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            <span>Edit</span>
+                                        </button>
+                                        <button @click="deleteCredentials"
+                                                :disabled="deletingCredentials"
+                                                class="px-4 py-2 bg-white text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg v-if="deletingCredentials" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            <span>{{ deletingCredentials ? 'Deleting...' : 'Delete' }}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Test Result Messages -->
+                            <div v-if="connectionTestResult === 'success'" class="bg-green-50 border-2 border-green-200 rounded-lg p-4 slide-in">
+                                <div class="flex items-center">
+                                    <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div class="ml-3">
+                                        <h4 class="text-sm font-semibold text-green-800">Connection Test Successful!</h4>
+                                        <p class="text-sm text-green-700 mt-1">
+                                            Your credentials are valid and decryption works correctly.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="connectionTestResult === 'failed'" class="bg-red-50 border-2 border-red-200 rounded-lg p-4 slide-in">
+                                <div class="flex items-start">
+                                    <svg class="w-6 h-6 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="ml-3 flex-1">
+                                        <h4 class="text-sm font-semibold text-red-800">Connection Test Failed</h4>
+                                        <p class="text-sm text-red-700 mt-1">{{ connectionTestError }}</p>
+                                        <button @click="resetCredentials"
+                                                class="mt-3 px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors">
+                                            Reset and Re-enter Credentials
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Test Connection Button -->
+                            <button v-if="!connectionTestResult"
+                                    @click="testConnection"
+                                    :disabled="testingConnection"
+                                    class="w-full px-6 py-3 bg-white text-indigo-600 border-2 border-indigo-600 rounded-lg hover:bg-indigo-50 transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                <svg v-if="testingConnection" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <span>{{ testingConnection ? 'Testing Connection...' : 'Test Connection' }}</span>
+                            </button>
+
+                            <!-- Continue Button (Only enabled after successful test) -->
+                            <button v-if="connectionTestResult === 'success'"
+                                    @click="completeStep(5)"
+                                    class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                                <span>Continue to Next Step</span>
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Security Note -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-semibold text-green-800">Your keys are secure</h4>
+                                    <p class="text-sm text-green-700 mt-1">
+                                        We encrypt and store your API keys securely. They're never exposed or shared.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Connect & Authorize -->
+            <div class="bg-white rounded-xl border-2 transition-all duration-300"
+                 :class="currentStep === 6 ? 'border-indigo-500 shadow-lg' : 'border-gray-200 shadow-sm'">
+                <button @click="toggleStep(6)"
+                        :disabled="!stepCompleted[5]"
+                        class="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors rounded-t-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                    <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div :class="[
+                            'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-base sm:text-lg flex-shrink-0',
+                            stepCompleted[6] ? 'bg-green-500 text-white' :
+                            currentStep === 6 ? 'bg-indigo-600 text-white' :
+                            'bg-gray-200 text-gray-500'
+                        ]">
+                            <svg v-if="stepCompleted[6]" class="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span v-else>6</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900">Connect Your Twitter Account</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs text-indigo-600 font-medium">~30 seconds</span>
+                                <span v-if="stepCompleted[6]" class="text-xs text-green-600 font-medium flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Connected as @{{ oauthUsername }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 transform transition-transform flex-shrink-0 ml-2"
+                         :class="{ 'rotate-180': expandedSteps[6] }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div v-show="expandedSteps[6]" class="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+                    <div class="pt-4 sm:pt-6 space-y-4">
+                        <div v-if="!isConnected" class="prose prose-sm max-w-none">
+                            <p class="text-sm sm:text-base text-gray-700 mb-4">
+                                Final step! Click the button below to authorize our app to post on your behalf.
+                            </p>
+
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-blue-800">
+                                            <strong>What happens next:</strong>
+                                        </p>
+                                        <ul class="mt-2 text-sm text-blue-700 space-y-1">
+                                            <li>• A popup window will open with Twitter's authorization page</li>
+                                            <li>• Review the permissions and click "Authorize app"</li>
+                                            <li>• You'll be redirected back here automatically</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button @click="connectTwitterWithUserCredentials"
+                                    :disabled="connectingTwitter"
+                                    class="w-full px-6 py-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-all font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                                <svg v-if="connectingTwitter" class="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <svg v-else class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                                <span>{{ connectingTwitter ? 'Opening Twitter...' : 'Connect Twitter Account' }}</span>
+                            </button>
+                        </div>
+
+                        <div v-else class="text-center py-8">
+                            <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+                                <svg class="w-10 h-10 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Twitter Connected!</h3>
+                            <p class="text-gray-600 mb-1">Your Twitter account <strong class="text-gray-900">@{{ oauthUsername }}</strong> is now connected.</p>
+                            <p class="text-sm text-gray-500">You can now post tweets directly from AI News Hub.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Celebration -->
+        <div v-if="setupComplete" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-8 slide-in">
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full mb-6">
+                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Setup Complete!</h2>
+                    <p class="text-base sm:text-lg text-gray-600 mb-6">
+                        Your Twitter account is now connected and ready to use.
+                    </p>
+
+                    <!-- Next Steps -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 text-left">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <svg class="w-6 h-6 text-indigo-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            What's Next?
+                        </h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-indigo-600 font-bold text-sm">1</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900">Browse News Articles</h4>
+                                    <p class="text-sm text-gray-600">Find interesting articles from our curated feed</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-purple-600 font-bold text-sm">2</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900">Generate Your First Post</h4>
+                                    <p class="text-sm text-gray-600">Use AI to create engaging tweet content</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="flex-shrink-0 w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-pink-600 font-bold text-sm">3</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-900">Publish to Twitter</h4>
+                                    <p class="text-sm text-gray-600">Share your content with one click</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-2xl mx-auto">
+                        <button @click="goToNewsFeed"
+                                class="flex-1 sm:flex-none px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            Create Your First Post
+                        </button>
+                        <button @click="goBack"
+                                class="flex-1 sm:flex-none px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold shadow-md hover:shadow-lg">
+                            Back to Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="mt-8 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Need Help?
+                </h3>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <svg class="w-5 h-5 text-indigo-600 mr-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <div>
+                            <h4 class="font-medium text-gray-900 text-sm mb-1">Documentation</h4>
+                            <p class="text-sm text-gray-600">Read our comprehensive setup guides and FAQs</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <svg class="w-5 h-5 text-indigo-600 mr-3 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        <div>
+                            <h4 class="font-medium text-gray-900 text-sm mb-1">Support Team</h4>
+                            <p class="text-sm text-gray-600">Contact us for personalized assistance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div v-if="toast.show" class="toast">
+            <div :class="[
+                'px-6 py-4 rounded-lg shadow-2xl border-2 flex items-center gap-3 min-w-[300px]',
+                toast.type === 'success' ? 'bg-green-50 border-green-500' :
+                toast.type === 'error' ? 'bg-red-50 border-red-500' :
+                'bg-blue-50 border-blue-500'
+            ]">
+                <svg v-if="toast.type === 'success'" class="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <svg v-else-if="toast.type === 'error'" class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p :class="[
+                    'font-medium text-sm',
+                    toast.type === 'success' ? 'text-green-800' :
+                    toast.type === 'error' ? 'text-red-800' :
+                    'text-blue-800'
+                ]">{{ toast.message }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Twitter OAuth Component -->
+    <script type="module" src="setup-twitter.js"></script>
+</body>
+</html>

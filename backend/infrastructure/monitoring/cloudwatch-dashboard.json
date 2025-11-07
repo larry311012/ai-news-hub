@@ -1,0 +1,131 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/ECS", "CPUUtilization", {"stat": "Average"}],
+          [".", "MemoryUtilization", {"stat": "Average"}]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "ECS Service - CPU & Memory",
+        "yAxis": {
+          "left": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/ApplicationELB", "TargetResponseTime", {"stat": "Average"}],
+          [".", "RequestCount", {"stat": "Sum"}]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "ALB - Response Time & Request Count"
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/ApplicationELB", "HTTPCode_Target_2XX_Count", {"stat": "Sum"}],
+          [".", "HTTPCode_Target_4XX_Count", {"stat": "Sum"}],
+          [".", "HTTPCode_Target_5XX_Count", {"stat": "Sum"}]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "ALB - HTTP Response Codes"
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/RDS", "CPUUtilization", {"stat": "Average"}],
+          [".", "DatabaseConnections", {"stat": "Average"}],
+          [".", "FreeableMemory", {"stat": "Average"}]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "RDS - Database Metrics"
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/RDS", "ReadLatency", {"stat": "Average"}],
+          [".", "WriteLatency", {"stat": "Average"}]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "RDS - Latency",
+        "yAxis": {
+          "left": {
+            "min": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/ElastiCache", "CPUUtilization", {"stat": "Average"}],
+          [".", "NetworkBytesIn", {"stat": "Sum"}],
+          [".", "NetworkBytesOut", {"stat": "Sum"}]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "ElastiCache Redis - Metrics"
+      }
+    },
+    {
+      "type": "log",
+      "properties": {
+        "query": "SOURCE '/ecs/ai-post-gen-production'\n| fields @timestamp, @message\n| filter @message like /ERROR/\n| sort @timestamp desc\n| limit 20",
+        "region": "us-east-1",
+        "title": "Recent Application Errors",
+        "stacked": false
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/S3", "NumberOfObjects", {"stat": "Average"}],
+          [".", "BucketSizeBytes", {"stat": "Average"}]
+        ],
+        "period": 86400,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "S3 - Storage Metrics"
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          ["AWS/CloudFront", "Requests", {"stat": "Sum"}],
+          [".", "BytesDownloaded", {"stat": "Sum"}]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "title": "CloudFront - CDN Metrics"
+      }
+    }
+  ]
+}

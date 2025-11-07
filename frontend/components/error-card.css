@@ -1,0 +1,149 @@
+/**
+ * Error Card Styles
+ * Beautiful, accessible error displays with smooth animations
+ */
+
+/* Slide-in animation for error card appearance */
+@keyframes slide-in-error {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.error-card {
+    animation: slide-in-error 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Smooth details toggle animation */
+details[open] summary svg {
+    transform: rotate(180deg);
+}
+
+details summary svg {
+    transition: transform 0.3s ease;
+}
+
+details summary {
+    list-style: none;
+    outline: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Focus states for accessibility */
+.error-card button:focus-visible,
+.error-card a:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+/* Hover effects for action items */
+.error-card ol li:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem;
+    margin: -0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+/* Loading spinner for retry button */
+.error-card .btn-loading::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Pulse animation for countdown */
+@keyframes countdown-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+#retry-countdown {
+    animation: countdown-pulse 1s ease-in-out infinite;
+    font-weight: bold;
+    display: inline-block;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .error-card {
+        padding: 1rem;
+    }
+
+    .error-card h3 {
+        font-size: 1.125rem;
+    }
+
+    .error-card .flex.flex-wrap.gap-3 {
+        flex-direction: column;
+    }
+
+    .error-card .flex.flex-wrap.gap-3 button,
+    .error-card .flex.flex-wrap.gap-3 a {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+    .error-card {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5),
+                    0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Accessibility: Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .error-card {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    details summary svg {
+        transition: none;
+    }
+
+    #retry-countdown {
+        animation: none;
+    }
+}
+
+/* Print styles - hide error cards */
+@media print {
+    .error-card {
+        display: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .error-card {
+        border-width: 3px;
+    }
+
+    .error-card button {
+        border: 2px solid currentColor;
+    }
+}

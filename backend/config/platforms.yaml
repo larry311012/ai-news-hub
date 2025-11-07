@@ -1,0 +1,26 @@
+platforms:
+  twitter:
+    enabled: true
+    max_length: 280
+    hashtags: ["#AI", "#MachineLearning", "#Tech"]
+
+  linkedin:
+    enabled: true
+    max_length: 3000
+    tone: "professional"
+
+  instagram:
+    enabled: false  # Requires visual content
+    max_length: 2200
+
+  youtube:
+    enabled: false  # For video content/comments
+
+  threads:
+    enabled: true
+    max_length: 500
+
+posting_schedule:
+  frequency: "daily"  # daily, hourly, custom
+  times: ["09:00", "14:00", "18:00"]
+  timezone: "UTC"

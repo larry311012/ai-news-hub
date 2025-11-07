@@ -1,0 +1,35 @@
+# ============================================================================
+# Development Dockerfile for AI Post Generator Frontend
+# ============================================================================
+# Optimized for fast rebuilds and Hot Module Replacement (HMR)
+# ============================================================================
+
+FROM node:18-alpine
+
+# Install development dependencies
+RUN apk add --no-cache \
+    git \
+    curl
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Set environment variables
+ENV NODE_ENV=development
+
+# Expose ports
+EXPOSE 3000
+EXPOSE 24678
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:3000/ || exit 1
+
+# Development mode - use Vite dev server with HMR
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

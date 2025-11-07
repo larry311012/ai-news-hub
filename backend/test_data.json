@@ -1,0 +1,325 @@
+{
+  "sample_users": [
+    {
+      "email": "alice@example.com",
+      "password": "SecurePass123!",
+      "full_name": "Alice Johnson",
+      "bio": "Software engineer passionate about AI"
+    },
+    {
+      "email": "bob@example.com",
+      "password": "BobSecure456!",
+      "full_name": "Bob Smith",
+      "bio": "Data scientist and ML enthusiast"
+    },
+    {
+      "email": "charlie@example.com",
+      "password": "Charlie789Pass!",
+      "full_name": "Charlie Brown",
+      "bio": "Product manager focused on user experience"
+    }
+  ],
+  "oauth_responses": {
+    "google_success": {
+      "id": "108923456789012345678",
+      "email": "oauth.user@gmail.com",
+      "name": "OAuth Test User",
+      "picture": "https://lh3.googleusercontent.com/a/default-user",
+      "verified_email": true
+    },
+    "google_no_email": {
+      "id": "108923456789012345679",
+      "name": "OAuth No Email User",
+      "picture": "https://lh3.googleusercontent.com/a/no-email-user",
+      "verified_email": false
+    },
+    "github_success": {
+      "id": "12345678",
+      "login": "octocat",
+      "email": "octocat@github.com",
+      "name": "The Octocat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1?v=4"
+    }
+  },
+  "security_events": [
+    {
+      "type": "login_success",
+      "description": "User logged in successfully",
+      "severity": "info",
+      "metadata": {
+        "ip_address": "192.168.1.100",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        "location": "San Francisco, CA"
+      }
+    },
+    {
+      "type": "login_failed",
+      "description": "Failed login attempt - invalid password",
+      "severity": "warning",
+      "metadata": {
+        "ip_address": "192.168.1.100",
+        "attempts": 3,
+        "user_agent": "Mozilla/5.0"
+      }
+    },
+    {
+      "type": "password_changed",
+      "description": "User changed their password",
+      "severity": "high",
+      "metadata": {
+        "ip_address": "192.168.1.100",
+        "sessions_invalidated": 3
+      }
+    },
+    {
+      "type": "password_reset_requested",
+      "description": "Password reset link sent to email",
+      "severity": "warning",
+      "metadata": {
+        "ip_address": "192.168.1.100",
+        "email_sent": true
+      }
+    },
+    {
+      "type": "email_verified",
+      "description": "Email verification completed",
+      "severity": "info",
+      "metadata": {
+        "verification_method": "email_link"
+      }
+    },
+    {
+      "type": "oauth_linked",
+      "description": "OAuth provider linked to account",
+      "severity": "info",
+      "metadata": {
+        "provider": "google",
+        "oauth_email": "user@gmail.com"
+      }
+    },
+    {
+      "type": "api_key_created",
+      "description": "New API key created",
+      "severity": "info",
+      "metadata": {
+        "provider": "openai",
+        "key_name": "Production Key"
+      }
+    },
+    {
+      "type": "session_revoked",
+      "description": "User session manually revoked",
+      "severity": "warning",
+      "metadata": {
+        "session_id": 123,
+        "revoked_by": "user"
+      }
+    },
+    {
+      "type": "account_deleted",
+      "description": "User account permanently deleted",
+      "severity": "critical",
+      "metadata": {
+        "deleted_at": "2025-10-15T10:30:00Z",
+        "reason": "user_request"
+      }
+    },
+    {
+      "type": "suspicious_activity",
+      "description": "Multiple failed login attempts detected",
+      "severity": "critical",
+      "metadata": {
+        "ip_address": "10.0.0.1",
+        "attempts": 10,
+        "time_window": "15 minutes",
+        "action_taken": "account_locked"
+      }
+    }
+  ],
+  "email_templates": {
+    "verification": {
+      "subject": "Verify your email address",
+      "body": "Click the link to verify your email: {verification_link}",
+      "variables": ["verification_link", "user_name", "expires_in"]
+    },
+    "password_reset": {
+      "subject": "Reset your password",
+      "body": "Click the link to reset your password: {reset_link}",
+      "variables": ["reset_link", "user_name", "expires_in", "ip_address"]
+    },
+    "welcome": {
+      "subject": "Welcome to AI Post!",
+      "body": "Welcome {user_name}! Get started by connecting your accounts.",
+      "variables": ["user_name"]
+    },
+    "password_changed": {
+      "subject": "Password changed successfully",
+      "body": "Your password was changed. If this wasn't you, contact support immediately.",
+      "variables": ["user_name", "timestamp", "ip_address"]
+    },
+    "new_login": {
+      "subject": "New login detected",
+      "body": "A new login was detected from {location}. If this wasn't you, secure your account.",
+      "variables": ["user_name", "location", "ip_address", "device", "timestamp"]
+    }
+  },
+  "test_passwords": {
+    "weak": [
+      "123456",
+      "password",
+      "12345678",
+      "qwerty",
+      "abc123",
+      "password123"
+    ],
+    "common": [
+      "welcome",
+      "monkey",
+      "dragon",
+      "letmein",
+      "trustno1",
+      "password1"
+    ],
+    "medium": [
+      "Pass1234",
+      "MyPassword1",
+      "Secret123",
+      "Welcome2023"
+    ],
+    "strong": [
+      "Tr0ub4dor&3",
+      "MyS3cur3P@ssw0rd!",
+      "C0mpl3x!P@ssw0rd",
+      "Str0ng&S3cur3#P@ss"
+    ],
+    "very_strong": [
+      "xK8#mQ2$vL9@pN4%wR7",
+      "Correct-Horse-Battery-Staple-2023",
+      "aB3$dE6&fG9#hI2@jK5"
+    ]
+  },
+  "sql_injection_payloads": [
+    "'; DROP TABLE users; --",
+    "' OR '1'='1",
+    "admin'--",
+    "' OR 1=1--",
+    "'; EXEC sp_MSForEachTable 'DROP TABLE ?'; --",
+    "1' UNION SELECT NULL, NULL, NULL--",
+    "' OR 'a'='a",
+    "'; DELETE FROM users WHERE 1=1; --"
+  ],
+  "xss_payloads": [
+    "<script>alert('XSS')</script>",
+    "<img src=x onerror=alert('XSS')>",
+    "<svg onload=alert('XSS')>",
+    "javascript:alert('XSS')",
+    "<iframe src=\"javascript:alert('XSS')\">",
+    "<body onload=alert('XSS')>",
+    "<input onfocus=alert('XSS') autofocus>",
+    "\"><script>alert('XSS')</script>"
+  ],
+  "api_keys": {
+    "openai": {
+      "valid": "sk-proj-1234567890abcdefghijklmnopqrstuvwxyz",
+      "invalid": "invalid-key-format",
+      "expired": "sk-old-1234567890",
+      "test": "sk-test-1234567890"
+    },
+    "anthropic": {
+      "valid": "sk-ant-api03-1234567890abcdefghijklmnopqrstuvwxyz",
+      "invalid": "invalid-anthropic-key",
+      "test": "sk-ant-test-1234567890"
+    },
+    "twitter": {
+      "valid": "AAAAAAAAAAAAAAAAAAAAABcde",
+      "invalid": "invalid-twitter-token"
+    }
+  },
+  "rate_limit_scenarios": [
+    {
+      "endpoint": "/auth/login",
+      "limit": 5,
+      "window": "15 minutes",
+      "expected_status": 429
+    },
+    {
+      "endpoint": "/auth/register",
+      "limit": 5,
+      "window": "1 hour",
+      "expected_status": 429
+    },
+    {
+      "endpoint": "/auth/password-reset",
+      "limit": 3,
+      "window": "1 hour",
+      "expected_status": 429
+    },
+    {
+      "endpoint": "/auth/verify-email/resend",
+      "limit": 3,
+      "window": "1 hour",
+      "expected_status": 429
+    }
+  ],
+  "session_devices": [
+    {
+      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+      "device_type": "desktop",
+      "browser": "Chrome",
+      "os": "macOS"
+    },
+    {
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15",
+      "device_type": "mobile",
+      "browser": "Safari",
+      "os": "iOS"
+    },
+    {
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "device_type": "desktop",
+      "browser": "Edge",
+      "os": "Windows"
+    },
+    {
+      "user_agent": "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36",
+      "device_type": "mobile",
+      "browser": "Chrome",
+      "os": "Android"
+    }
+  ],
+  "security_score_factors": {
+    "email_verified": 20,
+    "password_strong": 15,
+    "two_factor_enabled": 25,
+    "oauth_linked": 10,
+    "api_keys_encrypted": 10,
+    "recent_password_change": 10,
+    "no_suspicious_activity": 10
+  },
+  "test_timings": {
+    "authentication": {
+      "register": 200,
+      "login": 150,
+      "logout": 50,
+      "token_validation": 30
+    },
+    "profile": {
+      "get": 50,
+      "update": 100
+    },
+    "password": {
+      "change": 200,
+      "reset_request": 150,
+      "reset_confirm": 200
+    },
+    "oauth": {
+      "callback": 500,
+      "link": 300,
+      "unlink": 100
+    },
+    "email_verification": {
+      "send": 50,
+      "verify": 100
+    }
+  }
+}

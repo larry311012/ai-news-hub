@@ -1,0 +1,71 @@
+sources:
+  rss_feeds:
+    # Major AI News Sites
+    - name: "TechCrunch AI"
+      url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+      category: "news"
+
+    - name: "VentureBeat AI"
+      url: "https://venturebeat.com/category/ai/feed/"
+      category: "news"
+
+    - name: "AI News"
+      url: "https://www.artificialintelligence-news.com/feed/"
+      category: "news"
+
+    # Company Blogs
+    - name: "OpenAI Blog"
+      url: "https://openai.com/blog/rss.xml"
+      category: "company"
+
+    - name: "Anthropic Blog"
+      url: "https://www.anthropic.com/blog/rss.xml"
+      category: "company"
+
+    - name: "Google AI Blog"
+      url: "https://blog.research.google/feeds/posts/default"
+      category: "company"
+
+    - name: "Hugging Face Blog"
+      url: "https://huggingface.co/blog/feed.xml"
+      category: "company"
+
+    - name: "DeepMind Blog"
+      url: "https://www.deepmind.com/blog/rss.xml"
+      category: "company"
+
+    # Research & Academic
+    - name: "MIT Technology Review AI"
+      url: "https://www.technologyreview.com/topic/artificial-intelligence/feed"
+      category: "research"
+
+    - name: "ArXiv Machine Learning"
+      url: "https://rss.arxiv.org/rss/cs.LG"
+      category: "research"
+
+    - name: "ArXiv AI"
+      url: "https://rss.arxiv.org/rss/cs.AI"
+      category: "research"
+
+    - name: "Hugging Face Daily Papers"
+      url: "https://papers.takara.ai/api/feed"
+      category: "research"
+
+    # Expert Newsletters & Blogs
+    - name: "The Batch by Andrew Ng"
+      url: "https://www.deeplearning.ai/the-batch/feed/"
+      category: "newsletter"
+
+    - name: "AI Weekly"
+      url: "https://aiweekly.co/issues.rss"
+      category: "newsletter"
+
+    - name: "Last Week in AI"
+      url: "https://lastweekin.ai/feed"
+      category: "newsletter"
+
+  web_sources:
+    - name: "Hacker News AI"
+      url: "https://news.ycombinator.com/submitted?id=whoishiring"
+      selector: ".storylink"
+      category: "community"

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue.js Test Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div id="app">
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-indigo-600 mb-4">Vue.js Diagnostic Test</h1>
+
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50 rounded">
+                    <h2 class="font-semibold text-lg mb-2">Test 1: Vue Template Syntax</h2>
+                    <p class="text-gray-700">Message: {{ message }}</p>
+                    <p class="text-gray-700">Count: {{ count }}</p>
+                </div>
+
+                <div class="p-4 bg-green-50 rounded">
+                    <h2 class="font-semibold text-lg mb-2">Test 2: User Object</h2>
+                    <p class="text-gray-700">Name: {{ user.name }}</p>
+                    <p class="text-gray-700">Email: {{ user.email }}</p>
+                    <p class="text-gray-700">Initials: {{ getUserInitials(user.name) }}</p>
+                </div>
+
+                <div class="p-4 bg-purple-50 rounded">
+                    <h2 class="font-semibold text-lg mb-2">Test 3: Conditional Rendering</h2>
+                    <p v-if="isAuthenticated" class="text-green-600">User is authenticated!</p>
+                    <p v-else class="text-red-600">User is NOT authenticated</p>
+                </div>
+
+                <div class="p-4 bg-yellow-50 rounded">
+                    <h2 class="font-semibold text-lg mb-2">Test 4: Interactive Button</h2>
+                    <button @click="incrementCount"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                        Click Me ({{ count }})
+                    </button>
+                </div>
+
+                <div class="p-4 bg-red-50 rounded">
+                    <h2 class="font-semibold text-lg mb-2">Test 5: Tailwind CSS</h2>
+                    <p class="text-sm text-gray-600">If you see colors and styling, Tailwind is working!</p>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-gray-100 rounded">
+                <h3 class="font-semibold mb-2">Debug Info:</h3>
+                <pre class="text-xs">{{ JSON.stringify({isAuthenticated, user, count}, null, 2) }}</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        if (typeof Vue !== 'undefined') {
+
+            const { createApp } = Vue;
+
+            const app = createApp({
+                data() {
+                    return {
+                        message: 'Vue.js is working!',
+                        count: 0,
+                        isAuthenticated: true,
+                        user: {
+                            name: 'John Doe',
+                            email: 'john@example.com'
+                        }
+                    };
+                },
+                methods: {
+                    getUserInitials(name) {
+                        if (!name) return '?';
+                        return name.split(' ')
+                            .map(n => n[0])
+                            .join('')
+                            .toUpperCase()
+                            .substring(0, 2);
+                    },
+                    incrementCount() {
+                        this.count++;
+                    }
+                },
+                mounted() {}
+            });
+
+            app.mount('#app');
+        } else {
+            console.error('Vue.js not loaded!');
+            document.body.innerHTML = '<div style="color: red; padding: 20px; font-size: 20px;">ERROR: Vue.js CDN failed to load!</div>';
+        }
+    </script>
+</body>
+</html>

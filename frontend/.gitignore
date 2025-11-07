@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files (keep .env.example)
+.env.local
+.env.production.local
+.env.development.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Vite cache
+.vite/
+
+# Test and verification files
+test-api-client.html
+verify-cors-fix.sh
+CORS_FIX_*.md
+*-demo.html
+*-test.html
+*-debug.html
+COMPONENT_*.html
+DEMO_*.html
+STEP_*.html
+TEST_*.html
+component-showcase.html
+dev-warning.html
+loading_demo.html
+migration-test-dashboard.html
+ab_testing_dashboard.html
+cdn-test.html
+feed-management-demo.html
+feed-management-with-modal.html.bak*
+feed-management-with-modal.html
+oauth_integration.html
+loading-screen-component.html
+loading-screen-design.html
+security_dashboard.html
+*.backup_*
+*.bak
+coverage/
+
+# Development scripts
+*-debug.js
+verify_*.sh
+check-*.sh
+convert-*.js
+update_*.py
+auth_updated.js.BROKEN_DO_NOT_USE
+
+# Verification files
+VERIFY_*.sh
+QUICK_START.sh

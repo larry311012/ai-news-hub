@@ -1,0 +1,175 @@
+<!--
+  Post Generation Modal Component
+
+  Usage:
+  1. Include this HTML in your page (or copy into your main HTML)
+  2. Include post-generation.css
+  3. Include post-generation-ui.js
+  4. Initialize with: new PostGenerationUI({ ... })
+
+  The modal is hidden by default and shown when generation starts.
+-->
+
+<!-- Generate Button -->
+<button id="generateBtn" class="btn-generate-default">
+  <span class="btn-icon">⚡</span>
+  <span class="btn-text">Generate Posts</span>
+  <span class="btn-subtext">Select articles to continue</span>
+</button>
+
+<!-- Loading Overlay (Hidden by default) -->
+<div
+  id="loadingOverlay"
+  class="loading-overlay"
+  style="display: none;"
+  role="dialog"
+  aria-labelledby="loadingTitle"
+  aria-describedby="loadingDescription"
+  aria-live="polite"
+>
+  <div class="loading-card">
+
+    <!-- Heading -->
+    <h1 id="loadingTitle" class="loading-heading">
+      <span class="icon">🤖</span>
+      Generating Your Posts
+    </h1>
+
+    <!-- Screen reader description -->
+    <div id="loadingDescription" class="sr-only">
+      Currently generating posts from your selected articles.
+      This process typically takes 10 to 30 seconds.
+      Press Escape to cancel.
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <span class="progress-percentage">0%</span>
+      <div
+        class="progress-bar-bg"
+        role="progressbar"
+        aria-valuenow="0"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-label="Post generation progress"
+      >
+        <div class="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Step List -->
+    <ul class="step-list" id="stepList" aria-label="Generation steps">
+      <li class="step-item waiting" data-step="analyze">
+        <span class="step-icon" aria-hidden="true">⏳</span>
+        <span class="step-text">Article analyzed</span>
+        <span class="step-time"></span>
+      </li>
+      <li class="step-item waiting" data-step="extract">
+        <span class="step-icon" aria-hidden="true">⏳</span>
+        <span class="step-text">Key points extracted</span>
+        <span class="step-time"></span>
+      </li>
+      <li class="step-item waiting" data-step="twitter">
+        <span class="step-icon" aria-hidden="true">⏳</span>
+        <span class="step-text">Generating Twitter post...</span>
+        <span class="step-time"></span>
+      </li>
+      <li class="step-item waiting" data-step="linkedin">
+        <span class="step-icon" aria-hidden="true">⏳</span>
+        <span class="step-text">Generating LinkedIn post...</span>
+        <span class="step-time"></span>
+      </li>
+      <li class="step-item waiting" data-step="threads">
+        <span class="step-icon" aria-hidden="true">⏳</span>
+        <span class="step-text">Generating Threads post...</span>
+        <span class="step-time"></span>
+      </li>
+    </ul>
+
+    <!-- Status Message -->
+    <div
+      class="status-message"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <div class="message-text">Starting generation...</div>
+      <div class="message-subtext">This usually takes 10-30 seconds</div>
+    </div>
+
+    <!-- Time Estimate -->
+    <div class="time-estimate" aria-live="polite">
+      <span class="time-icon" aria-hidden="true">⏱</span>
+      <span class="time-text">
+        Estimated time remaining:
+        <span id="timeRemaining">30</span> seconds
+      </span>
+    </div>
+
+    <!-- Cancel Button -->
+    <button
+      class="cancel-btn"
+      onclick="postGenUI.cancelGeneration()"
+      aria-label="Cancel post generation"
+    >
+      Cancel Generation
+    </button>
+
+  </div>
+</div>
+
+<!--
+  Example Integration in your page:
+
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Posts</title>
+
+    <!-- Include the CSS -->
+    <link rel="stylesheet" href="/styles/post-generation.css">
+  </head>
+  <body>
+
+    <!-- Your article list here -->
+    <div class="articles">
+      <label>
+        <input type="checkbox" class="article-checkbox" value="article-1">
+        Article 1
+      </label>
+      <label>
+        <input type="checkbox" class="article-checkbox" value="article-2">
+        Article 2
+      </label>
+    </div>
+
+    <!-- Include the modal component -->
+    <div id="postGenerationContainer">
+      <!-- Paste the component HTML here -->
+    </div>
+
+    <!-- Include the JavaScript -->
+    <script src="/js/post-generation-ui.js"></script>
+
+    <!-- Optional: Custom configuration -->
+    <script>
+      // The script auto-initializes, but you can customize:
+      postGenUI = new PostGenerationUI({
+        apiEndpoint: '/api/posts/generate',
+        editorUrl: '/post-editor.html',
+        profileUrl: '/profile.html',
+        estimatedDuration: 30000,
+        successHoldTime: 3000
+      });
+
+      // Override article selection if needed:
+      postGenUI.getSelectedArticles = function() {
+        const checkboxes = document.querySelectorAll('.article-checkbox:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+      };
+    </script>
+  </body>
+  </html>
+-->

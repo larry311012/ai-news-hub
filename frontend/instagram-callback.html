@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Instagram Connection</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      max-width: 400px;
+    }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .success { color: #4ade80; font-size: 48px; margin-bottom: 10px; }
+    .error { color: #f87171; font-size: 48px; margin-bottom: 10px; }
+    h2 { margin: 10px 0; font-size: 24px; }
+    p { font-size: 14px; opacity: 0.9; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="content">
+      <div class="spinner"></div>
+      <h2>Connecting Instagram...</h2>
+      <p id="status">Please wait while we complete the connection</p>
+    </div>
+  </div>
+
+  <script>
+    // This page is opened by the OAuth callback
+    // It validates the connection and closes the popup
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const instagram = urlParams.get('instagram');
+    const username = urlParams.get('username');
+    const contentEl = document.getElementById('content');
+
+    if (instagram === 'connected') {
+      // Success
+      contentEl.innerHTML = `
+        <div class="success">✓</div>
+        <h2>Instagram Connected!</h2>
+        <p>${username ? `@${username} has been connected successfully` : 'Your account has been connected'}</p>
+        <p style="margin-top: 20px; font-size: 12px;">This window will close in 2 seconds...</p>
+      `;
+
+      // Send message to parent window
+      if (window.opener) {
+        window.opener.postMessage({
+          type: 'instagram_oauth_complete',
+          platform: 'instagram',
+          success: true,
+          username: username
+        }, window.location.origin);
+      }
+
+      setTimeout(() => {
+        window.close();
+      }, 2000);
+
+    } else if (instagram === 'error') {
+      // Error
+      const errorMsg = urlParams.get('message') || 'Connection failed. Please try again.';
+      contentEl.innerHTML = `
+        <div class="error">✗</div>
+        <h2>Connection Failed</h2>
+        <p>${errorMsg}</p>
+        <p style="margin-top: 20px; font-size: 12px;">This window will close in 3 seconds...</p>
+      `;
+
+      // Send message to parent window
+      if (window.opener) {
+        window.opener.postMessage({
+          type: 'instagram_oauth_complete',
+          platform: 'instagram',
+          success: false,
+          error: errorMsg
+        }, window.location.origin);
+      }
+
+      setTimeout(() => {
+        window.close();
+      }, 3000);
+
+    } else {
+      // Still processing or no status - close after delay
+      setTimeout(() => {
+        window.close();
+      }, 2000);
+    }
+
+    // Fallback: If window.close() doesn't work (some browsers block it)
+    setTimeout(() => {
+      if (!window.closed) {
+        contentEl.innerHTML = `
+          <div style="font-size: 24px; margin-bottom: 20px;">✓</div>
+          <h2>Done!</h2>
+          <p>You can close this window now</p>
+        `;
+      }
+    }, 5000);
+  </script>
+</body>
+</html>

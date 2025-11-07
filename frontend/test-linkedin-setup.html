@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Setup Testing Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">LinkedIn Setup Testing Tool</h1>
+
+            <!-- Backend Configuration Check -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">1. Backend Configuration Check</h2>
+                <button onclick="checkBackend()"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Check Backend Status
+                </button>
+                <div id="backend-status" class="mt-4"></div>
+            </div>
+
+            <!-- LinkedIn OAuth Check -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">2. LinkedIn OAuth Configuration</h2>
+                <button onclick="checkLinkedInOAuth()"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Test LinkedIn OAuth
+                </button>
+                <div id="oauth-status" class="mt-4"></div>
+            </div>
+
+            <!-- Connection Status Check -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">3. Check Connection Status</h2>
+                <button onclick="checkConnection()"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Check Connections
+                </button>
+                <div id="connection-status" class="mt-4"></div>
+            </div>
+
+            <!-- Local Storage Check -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">4. Local Storage State</h2>
+                <div class="flex gap-4">
+                    <button onclick="viewLocalStorage()"
+                            class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        View Progress
+                    </button>
+                    <button onclick="clearLocalStorage()"
+                            class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        Clear Progress
+                    </button>
+                </div>
+                <div id="storage-status" class="mt-4"></div>
+            </div>
+
+            <!-- Quick Setup Link -->
+            <div class="mt-8 p-6 bg-blue-50 rounded-lg">
+                <h3 class="text-lg font-semibold text-blue-900 mb-2">Ready to Setup?</h3>
+                <a href="setup-linkedin.html"
+                   class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Go to LinkedIn Setup
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+
+        function getAuthToken() {
+            return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        }
+
+        function showResult(elementId, content, type = 'info') {
+            const colors = {
+                success: 'bg-green-50 border-green-500 text-green-800',
+                error: 'bg-red-50 border-red-500 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-500 text-yellow-800',
+                info: 'bg-blue-50 border-blue-500 text-blue-800'
+            };
+
+            document.getElementById(elementId).innerHTML = `
+                <div class="border-l-4 p-4 ${colors[type]} rounded">
+                    ${content}
+                </div>
+            `;
+        }
+
+        async function checkBackend() {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/health`);
+                showResult('backend-status', `
+                    <p class="font-semibold">✅ Backend is running!</p>
+                    <p class="text-sm mt-2">Status: ${response.data.status || 'healthy'}</p>
+                `, 'success');
+            } catch (error) {
+                showResult('backend-status', `
+                    <p class="font-semibold">❌ Backend not running</p>
+                    <p class="text-sm mt-2">Error: ${error.message}</p>
+                    <p class="text-sm mt-2">Make sure backend is running on port 8000</p>
+                `, 'error');
+            }
+        }
+
+        async function checkLinkedInOAuth() {
+            const token = getAuthToken();
+            if (!token) {
+                showResult('oauth-status', `
+                    <p class="font-semibold">⚠️ Not logged in</p>
+                    <p class="text-sm mt-2">Please log in first to test OAuth</p>
+                `, 'warning');
+                return;
+            }
+
+            try {
+                const response = await axios.get(
+                    `${API_BASE_URL}/social-media/linkedin/connect?return_url=http://localhost:8000/test`,
+                    { headers: { 'Authorization': `Bearer ${token}` } }
+                );
+
+                if (response.data.success && response.data.authorization_url) {
+                    showResult('oauth-status', `
+                        <p class="font-semibold">✅ LinkedIn OAuth is configured!</p>
+                        <p class="text-sm mt-2">Authorization URL generated successfully</p>
+                        <details class="mt-2">
+                            <summary class="cursor-pointer text-sm font-medium">View Details</summary>
+                            <pre class="mt-2 text-xs bg-white p-2 rounded overflow-auto">${JSON.stringify(response.data, null, 2)}</pre>
+                        </details>
+                    `, 'success');
+                } else {
+                    showResult('oauth-status', `
+                        <p class="font-semibold">⚠️ Unexpected response</p>
+                        <pre class="mt-2 text-xs">${JSON.stringify(response.data, null, 2)}</pre>
+                    `, 'warning');
+                }
+            } catch (error) {
+                const status = error.response?.status;
+                const detail = error.response?.data?.detail;
+
+                if (status === 503) {
+                    showResult('oauth-status', `
+                        <p class="font-semibold">❌ LinkedIn OAuth not configured</p>
+                        <p class="text-sm mt-2">Error: ${detail || 'LinkedIn credentials missing'}</p>
+                        <div class="mt-4 p-3 bg-white rounded">
+                            <p class="text-sm font-semibold">To fix this:</p>
+                            <ol class="text-sm mt-2 ml-4 list-decimal space-y-1">
+                                <li>Create LinkedIn app at <a href="https://www.linkedin.com/developers/apps" target="_blank" class="text-blue-600 underline">LinkedIn Developers</a></li>
+                                <li>Add these to <code class="bg-gray-100 px-1">.env</code> file:
+                                    <pre class="mt-1 bg-gray-100 p-2 text-xs rounded">LINKEDIN_CLIENT_ID=your-client-id
+LINKEDIN_CLIENT_SECRET=your-client-secret
+LINKEDIN_REDIRECT_URI=http://localhost:8000/api/social-media/linkedin/callback</pre>
+                                </li>
+                                <li>Restart backend server</li>
+                            </ol>
+                        </div>
+                    `, 'error');
+                } else {
+                    showResult('oauth-status', `
+                        <p class="font-semibold">❌ Error checking OAuth</p>
+                        <p class="text-sm mt-2">Status: ${status}</p>
+                        <p class="text-sm">Error: ${detail || error.message}</p>
+                    `, 'error');
+                }
+            }
+        }
+
+        async function checkConnection() {
+            const token = getAuthToken();
+            if (!token) {
+                showResult('connection-status', `
+                    <p class="font-semibold">⚠️ Not logged in</p>
+                    <p class="text-sm mt-2">Please log in first to check connections</p>
+                `, 'warning');
+                return;
+            }
+
+            try {
+                const response = await axios.get(
+                    `${API_BASE_URL}/social-media/connections`,
+                    { headers: { 'Authorization': `Bearer ${token}` } }
+                );
+
+                const connections = response.data;
+                const linkedinConnection = connections.find(c => c.platform === 'linkedin');
+
+                if (linkedinConnection) {
+                    const isActive = linkedinConnection.is_active;
+                    showResult('connection-status', `
+                        <p class="font-semibold">${isActive ? '✅' : '⚠️'} LinkedIn Connection Found</p>
+                        <div class="mt-2 text-sm space-y-1">
+                            <p><strong>Status:</strong> ${isActive ? 'Active' : 'Inactive/Expired'}</p>
+                            <p><strong>Username:</strong> ${linkedinConnection.platform_username || 'N/A'}</p>
+                            <p><strong>User ID:</strong> ${linkedinConnection.platform_user_id || 'N/A'}</p>
+                            <p><strong>Created:</strong> ${new Date(linkedinConnection.created_at).toLocaleString()}</p>
+                            ${linkedinConnection.expires_at ? `<p><strong>Expires:</strong> ${new Date(linkedinConnection.expires_at).toLocaleString()}</p>` : ''}
+                        </div>
+                    `, isActive ? 'success' : 'warning');
+                } else {
+                    showResult('connection-status', `
+                        <p class="font-semibold">ℹ️ No LinkedIn Connection</p>
+                        <p class="text-sm mt-2">You haven't connected your LinkedIn account yet.</p>
+                        <p class="text-sm mt-2">Found ${connections.length} other connection(s): ${connections.map(c => c.platform).join(', ') || 'none'}</p>
+                    `, 'info');
+                }
+            } catch (error) {
+                showResult('connection-status', `
+                    <p class="font-semibold">❌ Error checking connections</p>
+                    <p class="text-sm mt-2">Error: ${error.response?.data?.detail || error.message}</p>
+                `, 'error');
+            }
+        }
+
+        function viewLocalStorage() {
+            const progress = localStorage.getItem('linkedin_setup_progress');
+            const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+            if (progress) {
+                const data = JSON.parse(progress);
+                showResult('storage-status', `
+                    <p class="font-semibold">📦 Setup Progress Found</p>
+                    <div class="mt-2 text-sm space-y-1">
+                        <p><strong>Current Step:</strong> ${data.currentStep} of 6</p>
+                        <p><strong>Completed Steps:</strong> ${Object.values(data.stepCompleted).filter(Boolean).length}</p>
+                        <p><strong>Is Connected:</strong> ${data.isConnected ? 'Yes ✅' : 'No'}</p>
+                        <p><strong>Credentials Saved:</strong> ${data.credentialsSaved ? 'Yes ✅' : 'No'}</p>
+                        <p><strong>Setup Complete:</strong> ${data.setupComplete ? 'Yes ✅' : 'No'}</p>
+                        <p><strong>Auth Token:</strong> ${authToken ? 'Present ✅' : 'Missing ❌'}</p>
+                    </div>
+                    <details class="mt-3">
+                        <summary class="cursor-pointer text-sm font-medium">View Raw Data</summary>
+                        <pre class="mt-2 text-xs bg-white p-2 rounded overflow-auto">${JSON.stringify(data, null, 2)}</pre>
+                    </details>
+                `, 'info');
+            } else {
+                showResult('storage-status', `
+                    <p class="font-semibold">ℹ️ No Progress Saved</p>
+                    <p class="text-sm mt-2">No setup progress found in local storage.</p>
+                    <p class="text-sm mt-2"><strong>Auth Token:</strong> ${authToken ? 'Present ✅' : 'Missing ❌'}</p>
+                `, 'info');
+            }
+        }
+
+        function clearLocalStorage() {
+            if (confirm('Are you sure you want to clear all LinkedIn setup progress?')) {
+                localStorage.removeItem('linkedin_setup_progress');
+                showResult('storage-status', `
+                    <p class="font-semibold">✅ Progress Cleared</p>
+                    <p class="text-sm mt-2">LinkedIn setup progress has been reset.</p>
+                    <p class="text-sm mt-2">You can start fresh now.</p>
+                `, 'success');
+            }
+        }
+
+        // Auto-check backend on load
+        window.addEventListener('load', () => {
+            checkBackend();
+        });
+    </script>
+</body>
+</html>
