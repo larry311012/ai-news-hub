@@ -98,7 +98,7 @@ class SocialMediaPost(Base):
     published_at = Column(DateTime, nullable=True)
 
     __table_args__ = (
-        Index("idx_post_platform", "post_id", "platform"),
+        Index("idx_social_media_post_platform", "post_id", "platform"),
         Index("idx_user_status", "user_id", "status"),
     )
 
