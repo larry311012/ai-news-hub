@@ -111,8 +111,8 @@ RATE_LIMIT_PER_MINUTE=60
     else:
         print("ℹ️  .env file already exists, skipping key generation")
 
-    # Run database migrations
-    run_command(f"{python_path} -m alembic upgrade head", "Setting up database")
+    # Initialize database
+    run_command(f"{python_path} -c \"from database import init_db; init_db()\"", "Setting up database")
 
     print("\n✅ Backend setup complete!")
 
