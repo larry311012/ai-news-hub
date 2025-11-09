@@ -65,3 +65,7 @@ lerna-debug.log*
 # OS
 Thumbs.db
 Desktop.ini
+
+# Private marketing materials
+SORA_*.md
+SORA_*.txt
