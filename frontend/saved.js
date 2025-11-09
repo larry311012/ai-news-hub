@@ -24,19 +24,8 @@ const app = createApp({
         };
     },
     async mounted() {
-        // Check authentication
-        await this.verifyAuth();
-
-        // Redirect if not authenticated
-        if (!this.isAuthenticated) {
-            showToast('Please sign in to view saved articles', 'warning');
-            setTimeout(() => {
-                window.location.href = 'auth.html?view=login&return=' + encodeURIComponent(window.location.pathname);
-            }, 1500);
-            return;
-        }
-
-        // Load saved articles
+        // In anonymous mode, no auth check needed - all users share one account
+        // Load saved articles directly
         await this.loadSavedArticles();
 
         // Close user menu when clicking outside

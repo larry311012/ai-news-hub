@@ -7,9 +7,21 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Security: A+](https://img.shields.io/badge/security-A%2B-brightgreen.svg)](#security-features)
 
-> Transform articles into platform-optimized social media posts using AI
+> **Single-User Local Tool** - Transform articles into platform-optimized social media posts using AI
 
-**AI News Hub** is an open-source social media content generator that leverages OpenAI GPT-4 and Anthropic Claude to create engaging, platform-specific posts for Twitter, LinkedIn, Instagram, and Threads. Built with privacy-first architecture, all API keys are encrypted and stay under your control.
+**AI News Hub** is an open-source social media content generator designed for **personal local use**. No account creation, no login required - just download, install, and use. Leverages OpenAI GPT-4 and Anthropic Claude to create engaging, platform-specific posts for Twitter, LinkedIn, Instagram, and Threads.
+
+**✨ Perfect for:**
+- Content creators managing their personal social media
+- Marketers automating their own accounts
+- Developers who want full control of their data
+- Anyone seeking privacy-first social media automation
+
+**🔒 Privacy First:**
+- All data stays on **your machine**
+- **No cloud service** - 100% local deployment
+- Your API keys never leave your computer
+- Complete control over your content and connections
 
 ---
 

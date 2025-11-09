@@ -248,10 +248,8 @@ class ApiClient {
         // Handle specific status codes
         switch (status) {
             case 401:
-                // No redirect for auth errors - app runs without authentication
-                if (!silent) {
-                    showToast('Authentication required for this action', 'warning');
-                }
+                // Silent - app runs in anonymous mode by default
+                // Users don't need to see auth warnings for local single-user deployment
                 break;
             case 403:
                 if (!silent) {

@@ -103,6 +103,10 @@ LOG_LEVEL=INFO
 
 # Rate Limiting
 RATE_LIMIT_PER_MINUTE=60
+
+# Anonymous Mode - Single User Local Deployment
+# No login required - all data belongs to one local user
+ANONYMOUS_MODE=true
 """
         with open(backend_dir / ".env", "w") as f:
             f.write(env_content)
@@ -113,6 +117,23 @@ RATE_LIMIT_PER_MINUTE=60
 
     # Initialize database
     run_command(f"{python_path} -c \"from database import init_db; init_db()\"", "Setting up database")
+
+    # Create anonymous user for single-user mode
+    run_command(
+        f"{python_path} -c \"from database import SessionLocal, User; "
+        f"from passlib.context import CryptContext; "
+        f"from datetime import datetime; "
+        f"db = SessionLocal(); "
+        f"existing = db.query(User).filter(User.id == 1).first(); "
+        f"if not existing: "
+        f"    pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto'); "
+        f"    user = User(id=1, email='user@localhost', password_hash=pwd_context.hash('password'), "
+        f"    full_name='Local User', is_active=True, is_verified=True, created_at=datetime.utcnow()); "
+        f"    db.add(user); db.commit(); "
+        f"    print('Anonymous user created (user_id=1)'); "
+        f"db.close()\"",
+        "Creating anonymous user"
+    )
 
     print("\n✅ Backend setup complete!")
 

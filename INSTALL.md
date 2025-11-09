@@ -1,5 +1,7 @@
 # Installation Guide
 
+> **Important:** AI News Hub is a **single-user local tool**. No account creation or login required - all data stays on your machine!
+
 Choose the installation method that works best for you:
 
 ## 🚀 Option 1: One-Click Setup (Recommended for Beginners)
@@ -76,20 +78,21 @@ See the [detailed manual installation guide](README.md#installation) in the main
 
 ### First-Time Setup
 
-1. **Create an account** at http://localhost:3000
-2. **Add your API key:**
+**No account creation needed!** Just open http://localhost:3000 and start using.
+
+1. **Add your API key:**
    - Go to Profile → API Keys
    - Add your OpenAI or Anthropic API key
    - Get keys from:
      - OpenAI: https://platform.openai.com/api-keys
      - Anthropic: https://console.anthropic.com/
 
-3. **Connect social media (optional):**
+2. **Connect social media (optional):**
    - Go to Settings → Social Connections
    - Connect Twitter, LinkedIn, Instagram, or Threads
    - You'll need developer accounts for each platform
 
-4. **Start generating posts!**
+3. **Start generating posts!**
    - Add RSS feeds or paste article URLs
    - Generate AI posts
    - Publish to your connected platforms
