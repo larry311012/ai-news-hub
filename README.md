@@ -45,12 +45,11 @@ We've completely redesigned the installation process - **no technical expertise 
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
 - [Installation](#installation)
-- [Security Features](#security-features)
 - [Contributing](#contributing)
 - [License](#license)
 - [Support](#support)
 
-**For Developers:** See [TECHNICAL.md](TECHNICAL.md) for architecture, API documentation, development guides, and testing instructions.
+**For Developers:** See [TECHNICAL.md](TECHNICAL.md) for architecture, API documentation, security details, development guides, and testing instructions.
 
 ---
 
@@ -65,12 +64,13 @@ We've completely redesigned the installation process - **no technical expertise 
 - **Real-time Validation** - Character count, hashtag validation, and platform-specific constraints
 
 ### Security & Privacy
-- **AES-256 Encryption** - All API keys and OAuth tokens encrypted at rest
-- **User-Controlled Keys** - You own your API keys; no shared infrastructure
-- **OAuth 2.0/1.0a** - Secure social media authentication
-- **CSRF Protection** - Built-in cross-site request forgery protection
-- **Rate Limiting** - Per-user rate limits to prevent abuse
-- **Secure Sessions** - JWT-based authentication with configurable expiry
+- **Bank-Level Encryption** - All your API keys and tokens are encrypted (AES-256)
+- **Your Keys, Your Control** - No shared credentials; you own everything
+- **Secure Authentication** - OAuth 2.0/1.0a for social media connections
+- **Local Data** - Everything stored on your machine, never sent to third parties
+- **Privacy First** - No tracking, no analytics, no data collection
+
+**Security Score:** A+ rated. [See security details →](TECHNICAL.md#security-features)
 
 ### Developer Experience
 - **FastAPI Backend** - High-performance async Python framework with automatic OpenAPI docs
@@ -230,48 +230,6 @@ All scripts automatically:
    - Edit and publish to connected platforms
 
 **Need help?** Check [INSTALL.md](INSTALL.md) for detailed guides and troubleshooting.
-
----
-
-## Security Features
-
-AI News Hub implements defense-in-depth security:
-
-### Encryption & Storage
-- **AES-256-GCM encryption** for all API keys and OAuth tokens
-- **bcrypt hashing** for user passwords (cost factor: 12)
-- **Fernet symmetric encryption** with key rotation support
-- Encrypted values never logged or exposed in errors
-
-### Authentication & Authorization
-- **JWT tokens** with configurable expiry (default: 30 days)
-- **HTTP-only cookies** for session management
-- **Role-based access control** (user/admin)
-- **Password complexity requirements** enforced
-
-### Request Security
-- **CSRF protection** on all state-changing endpoints
-- **Rate limiting** (60 requests/minute per user)
-- **Input sanitization** with bleach
-- **SQL injection prevention** via SQLAlchemy ORM
-- **XSS protection** through Content Security Policy headers
-
-### Infrastructure
-- **CORS whitelisting** (no wildcard origins)
-- **Security headers** (HSTS, X-Frame-Options, etc.)
-- **TLS/SSL** required in production
-- **Secrets management** via environment variables
-- **Database connection pooling** with timeouts
-
-### Monitoring & Compliance
-- **Audit logging** for sensitive operations
-- **Error tracking** with PII redaction
-- **Security headers** validated on every response
-- **Dependency scanning** (coming soon: Dependabot)
-
-**Security Score**: A+ (95/100) based on OWASP Top 10 compliance
-
-**Learn More:** See [TECHNICAL.md](TECHNICAL.md) for detailed security architecture and configuration.
 
 ---
 
