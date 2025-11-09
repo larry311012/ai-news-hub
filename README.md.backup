@@ -45,12 +45,15 @@ We've completely redesigned the installation process - **no technical expertise 
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
 - [Installation](#installation)
+- [Configuration](#configuration)
+- [Architecture](#architecture)
+- [API Documentation](#api-documentation)
 - [Security Features](#security-features)
+- [Development](#development)
+- [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
-- [Support](#support)
-
-**For Developers:** See [TECHNICAL.md](TECHNICAL.md) for architecture, API documentation, development guides, and testing instructions.
+- [Roadmap](#roadmap)
 
 ---
 
@@ -107,8 +110,6 @@ We've completely redesigned the installation process - **no technical expertise 
 - **Proxy**: Nginx (production)
 - **Containerization**: Docker + Docker Compose
 - **CI/CD**: GitHub Actions (coming soon)
-
-**For Developers:** See [TECHNICAL.md](TECHNICAL.md) for detailed architecture diagrams, API documentation, and development workflows.
 
 ---
 
@@ -234,6 +235,129 @@ All scripts automatically:
 
 ---
 
+## Configuration
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DATABASE_URL` | Yes | `sqlite:///./ai_news.db` | PostgreSQL or SQLite connection string |
+| `ENCRYPTION_KEY` | **Yes** | - | Fernet key for encrypting API keys/tokens |
+| `JWT_SECRET_KEY` | **Yes** | - | Secret for JWT token signing |
+| `CSRF_SECRET_KEY` | **Yes** | - | Secret for CSRF token generation |
+| `ENVIRONMENT` | No | `development` | `development`, `staging`, or `production` |
+| `DEBUG` | No | `True` | Enable debug mode |
+| `LOG_LEVEL` | No | `INFO` | Logging level (DEBUG/INFO/WARNING/ERROR) |
+| `RATE_LIMIT_PER_MINUTE` | No | `60` | API requests per minute per user |
+| `REDIS_URL` | No | - | Redis URL for caching (optional) |
+| `CORS_ORIGINS` | No | `["http://localhost:3000"]` | Allowed CORS origins |
+
+### User Configuration
+
+After installation, users configure their own:
+- **AI Provider Keys**: OpenAI or Anthropic API keys (Profile → API Keys)
+- **OAuth Apps**: Twitter/LinkedIn/Instagram/Threads developer apps (Settings → OAuth Setup)
+
+**No shared API keys** - each user brings their own credentials.
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        AI News Hub                           │
+└─────────────────────────────────────────────────────────────┘
+
+┌──────────────────┐         ┌──────────────────┐
+│   Vue 3 Frontend │◄───────►│  FastAPI Backend │
+│   (Port 3000)    │   HTTP  │   (Port 8000)    │
+└──────────────────┘         └──────────────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+              ┌─────▼─────┐      ┌────▼────┐      ┌─────▼─────┐
+              │ PostgreSQL │      │  Redis  │      │ AI APIs   │
+              │  Database  │      │  Cache  │      │ (OpenAI/  │
+              └────────────┘      └─────────┘      │ Anthropic)│
+                                                    └───────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                      Data Flow                               │
+└─────────────────────────────────────────────────────────────┘
+
+User → Login → JWT Token → API Request → Rate Limiter → CSRF Check
+  → Business Logic → Database → Encrypt API Keys (AES-256)
+  → OAuth Flow → Social Media APIs → Post Publishing
+```
+
+### Key Components
+
+**Backend Layers**:
+- `api/` - FastAPI route handlers (auth, posts, feeds, social media)
+- `models/` - SQLAlchemy database models
+- `schemas/` - Pydantic request/response schemas
+- `services/` - Business logic (content generation, publishing)
+- `middleware/` - Security, rate limiting, CSRF protection
+- `utils/` - Encryption, error handling, logging
+
+**Frontend Structure**:
+- `views/` - Page components (login, generate, history)
+- `components/` - Reusable UI components
+- `composables/` - Vue 3 composition functions
+- `services/` - API client and utilities
+
+---
+
+## API Documentation
+
+### Interactive Docs
+Once running, visit:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+### Key Endpoints
+
+#### Authentication
+```
+POST   /api/auth/register          Register new user
+POST   /api/auth/login             Login and get JWT token
+POST   /api/auth/logout            Invalidate session
+GET    /api/auth/me                Get current user info
+```
+
+#### Content Generation
+```
+POST   /api/posts/generate         Generate AI post from article
+GET    /api/posts                  List user's posts (drafts + published)
+PUT    /api/posts/{id}             Update draft post
+DELETE /api/posts/{id}             Delete post
+```
+
+#### Publishing
+```
+POST   /api/posts/{id}/publish     Publish to social media platforms
+GET    /api/posts/history          Publishing history
+```
+
+#### RSS Feeds
+```
+GET    /api/feeds                  List user's RSS feeds
+POST   /api/feeds                  Add new feed
+DELETE /api/feeds/{id}             Remove feed
+POST   /api/feeds/discover         Auto-discover feeds from URL
+```
+
+#### Social Media
+```
+GET    /api/social-media/connections        List connected accounts
+GET    /api/social-media/{platform}/connect OAuth initiation
+GET    /api/social-media/{platform}/callback OAuth callback
+DELETE /api/social-media/{platform}          Disconnect account
+```
+
+---
+
 ## Security Features
 
 AI News Hub implements defense-in-depth security:
@@ -272,7 +396,117 @@ AI News Hub implements defense-in-depth security:
 
 **Security Score**: A+ (95/100) based on OWASP Top 10 compliance
 
-**Learn More:** See [TECHNICAL.md](TECHNICAL.md) for detailed security architecture and configuration.
+---
+
+## Development
+
+### Quick Start for Developers
+
+```bash
+# Backend development
+cd backend
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload
+
+# Frontend development
+cd frontend
+npm install
+npm run dev
+```
+
+### Running Tests
+
+```bash
+cd backend
+
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=. --cov-report=html
+
+# Run specific test file
+pytest tests/unit/test_content_generator.py
+
+# Run with verbose output
+pytest -v -s
+```
+
+**Test Stats**:
+- Total Tests: 1,951
+- Pass Rate: 62.7%
+- Coverage: 78% (backend)
+
+### Code Quality
+
+```bash
+# Format code
+black .
+
+# Lint
+flake8 .
+
+# Type checking
+mypy .
+
+# Security scan
+bandit -r .
+```
+
+### Database Migrations
+
+```bash
+# Create new migration
+alembic revision --autogenerate -m "Add new table"
+
+# Apply migrations
+alembic upgrade head
+
+# Rollback one migration
+alembic downgrade -1
+
+# View migration history
+alembic history
+```
+
+
+
+## Testing
+
+### Backend Tests
+
+```bash
+cd backend
+pytest tests/ -v
+```
+
+**Test Coverage**:
+- Unit Tests: Authentication, encryption, content generation
+- Integration Tests: OAuth flows, publishing workflows
+- API Tests: All endpoints with authentication
+- Security Tests: CSRF, rate limiting, injection attacks
+
+### Frontend Tests (Coming Soon)
+
+```bash
+cd frontend
+npm run test
+```
+
+### Load Testing
+
+```bash
+# Run load tests (requires pytest-benchmark)
+pytest tests/load_tests/ --benchmark-only
+```
+
+**Performance Benchmarks**:
+- API p50 latency: < 100ms
+- API p95 latency: < 200ms
+- API p99 latency: < 500ms
+- Database query time: < 50ms (average)
 
 ---
 
