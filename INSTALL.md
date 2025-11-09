@@ -27,9 +27,9 @@ Choose the installation method that works best for you:
    # OR: venv\Scripts\activate   # Windows
    ```
 
-3. **Install setup dependencies:**
+3. **Install dependencies:**
    ```bash
-   pip install cryptography python-dotenv
+   pip install -r requirements.txt
    ```
 
 4. **Run the setup script:**
@@ -39,7 +39,6 @@ Choose the installation method that works best for you:
 
 5. **That's it!** The script will:
    - ✅ Check your system
-   - ✅ Install all dependencies
    - ✅ Generate secure keys automatically
    - ✅ Set up the database with anonymous user
    - ✅ Configure everything for you

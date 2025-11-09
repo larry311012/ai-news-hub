@@ -130,8 +130,8 @@ python3 -m venv venv
 source venv/bin/activate  # Mac/Linux
 # OR: venv\Scripts\activate  # Windows
 
-# 3. Install setup dependencies
-pip install cryptography python-dotenv
+# 3. Install dependencies
+pip install -r requirements.txt
 
 # 4. Run the automated setup script
 python3 setup.py
@@ -140,9 +140,8 @@ python3 setup.py
 # That's it! Setup takes ~5 minutes
 ```
 
-**What it does automatically:**
+**What setup.py does automatically:**
 - ✅ Checks your system
-- ✅ Installs all dependencies
 - ✅ Generates secure keys (no copy/paste!)
 - ✅ Sets up database with anonymous user
 - ✅ Configures everything for you
