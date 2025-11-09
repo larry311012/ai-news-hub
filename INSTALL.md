@@ -184,6 +184,6 @@ See the [detailed manual installation guide](README.md#installation) in the main
 ## 📚 Next Steps
 
 After installation, check out:
-- [User Guide](docs/USER_GUIDE.md) - How to use all features
-- [FAQ](docs/FAQ.md) - Common questions
-- [README](README.md) - Full documentation
+- [USER_GUIDE.md](USER_GUIDE.md) - Complete guide on using the app
+- [README.md](README.md) - Overview and features
+- [TECHNICAL.md](TECHNICAL.md) - For developers

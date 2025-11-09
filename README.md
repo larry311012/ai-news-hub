@@ -166,10 +166,10 @@ Open <http://localhost:3000> - **Done!**
 
 ### 📖 Need Help?
 
-- **Complete guide:** [INSTALL.md](INSTALL.md) - Step-by-step for all skill levels
+- **Installation guide:** [INSTALL.md](INSTALL.md) - Step-by-step setup for all skill levels
+- **User guide:** [USER_GUIDE.md](USER_GUIDE.md) - How to use the app (RSS feeds, posts, publishing)
 - **Troubleshooting:** [Common issues and fixes](INSTALL.md#troubleshooting)
 - **Prerequisites:** [Python](https://www.python.org/downloads/) & [Node.js](https://nodejs.org/) downloads
-- **Video tutorials:** Coming soon!
 
 ---
 
@@ -229,7 +229,9 @@ All scripts automatically:
    - Click "Generate Post"
    - Edit and publish to connected platforms
 
-**Need help?** Check [INSTALL.md](INSTALL.md) for detailed guides and troubleshooting.
+**Need help?**
+- **Installation:** See [INSTALL.md](INSTALL.md) for detailed setup guides
+- **Using the app:** See [USER_GUIDE.md](USER_GUIDE.md) for step-by-step tutorials
 
 ---
 
@@ -296,10 +298,11 @@ Special thanks to all contributors and the open-source community.
 
 ## Support
 
-- **Documentation**: [docs/](docs/)
+- **User Guide**: [USER_GUIDE.md](USER_GUIDE.md) - Complete walkthrough
+- **Installation Help**: [INSTALL.md](INSTALL.md) - Setup guide
+- **Technical Docs**: [TECHNICAL.md](TECHNICAL.md) - For developers
 - **Discussions**: [GitHub Discussions](https://github.com/larry311012/ai-news-hub/discussions)
 - **Issues**: [GitHub Issues](https://github.com/larry311012/ai-news-hub/issues)
-- **Discord**: [Join our community](https://discord.gg/ainewshub) (coming soon)
 
 ---
 
