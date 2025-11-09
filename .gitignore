@@ -69,3 +69,6 @@ Desktop.ini
 # Private marketing materials
 SORA_*.md
 SORA_*.txt
+
+# Backup files (private)
+*.backup
