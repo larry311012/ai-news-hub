@@ -1,0 +1,78 @@
+====================================
+AI NEWS HUB - SORA VIDEO PROMPT
+Copy and paste this into Sora
+====================================
+
+Create a 60-second professional software demo video showcasing "AI News Hub", an open-source AI-powered social media automation tool. Cinematic quality, modern aesthetic, smooth camera movements.
+
+OPENING (0-8s):
+Split-screen transition: Left shows a stressed content creator surrounded by chaotic browser tabs and sticky notes. Right shows the same person calm and smiling using AI News Hub on a clean desk. Smooth dissolve transition from chaos to peace. Professional lighting, shallow depth of field.
+
+DASHBOARD DEMO (8-18s):
+Elegant zoom into laptop screen displaying AI News Hub interface. Clean modern UI with purple accents showing "302 Total Articles" from tech news feeds. Slow pan across news article cards featuring headlines about AI and technology. Highlight the search bar and category filters (News, Research, Company, Newsletter). Professional software demo style.
+
+ADD SOURCE FEATURE (18-26s):
+Close-up of hands typing "https://www.artificialintelligence-news.com/" into an "Add News Source" dialog box. The interface instantly discovers 3 RSS feeds with satisfying animated checkmarks appearing sequentially. Progress indicator dots glow at the top. Clean, magical moment. Modern UI design.
+
+API SECURITY (26-34s):
+Screen shows API Keys management page with two large provider cards: OpenAI logo (with "GPT-4, GPT-3.5" text) and Anthropic logo (with "Claude 3 Opus, Sonnet, Haiku" text). A green shield badge reading "Encrypted & Secure" appears with a soft glow effect. Smooth hover animation between providers. Professional, trustworthy feel.
+
+AI GENERATION MAGIC (34-44s):
+Article headline "Anthropic projects $70B in revenue by 2028: Report" magically transforms with sparkle effects into four social media posts. Four platform tabs appear with green checkmarks: Twitter, LinkedIn, Threads, Instagram. Focus on Twitter tab showing generated post with emoji, hashtags (#AIRevolution #TechNews #Innovation), and green character counter "229/280". Live preview card shown below. Magical AI transformation with particle effects.
+
+SETUP WIZARD (44-50s):
+Animated progress bar showing 6-step Twitter setup process. Five green checkmarks appear in smooth sequence: "Account ✓", "Project ✓", "Keys ✓", "Callback ✓", "Enter Keys ✓", with final step "Connect" highlighted. Badge shows "Total time: ~14 minutes" and "Difficulty: Easy". Gamified, encouraging progress visualization.
+
+LIVE PROOF (50-58s):
+Zoom into actual Twitter/X interface showing the published post live on @larryhui1's profile timeline. Post displays: "Anthropic's eyeing a massive $70B revenue by 2028, showcasing a booming B2B AI demand! 🚀 A sign of AI's big leap in business innovation and scalability. The future's bright and AI-driven! #AIRevolution #TechNews #Innovation 🤖📊" with 2 views counter. Real Twitter UI, authentic proof of concept.
+
+CLOSING LOGO (58-60s):
+Quick logo reveal: Twitter, LinkedIn, Instagram, and Threads logos appear in a rotating circle formation around the centered "AI News Hub" logo (purple and white). Text appears below: "Open Source • Privacy First • Free Forever" and "GitHub: larry311012/ai-news-hub". Clean, professional brand reveal with smooth animation. White background, minimalist design.
+
+STYLE REQUIREMENTS:
+- Professional software demo aesthetic
+- Smooth, cinematic camera movements (no shaky cam)
+- Modern UI/UX design elements
+- Purple brand color (#6366F1) as accent
+- Clean transitions (dissolves, fades, zooms)
+- Professional studio lighting
+- 1080p quality minimum
+- Realistic screen reflections on laptop
+- Subtle depth of field for depth
+- Corporate/tech video vibe
+
+CAMERA WORK:
+- Smooth zooms and pans
+- Professional tracking shots
+- Clean cuts between scenes
+- No jarring movements
+- Cinematic framing
+
+MOOD:
+- Professional yet approachable
+- Innovative and modern
+- Productive and efficient
+- Trustworthy and secure
+- Empowering for creators
+
+====================================
+ALTERNATIVE: SHORTER VERSION (30s)
+====================================
+
+If you need a 30-second version, use this:
+
+Create a 30-second professional demo of "AI News Hub" open-source social media automation tool. Modern, cinematic.
+
+(0-7s) Dashboard showing 302 tech articles in clean grid, purple-accented UI. Pan across news cards.
+
+(7-12s) Close-up: typing URL, app auto-discovers 3 RSS feeds with animated checkmarks. Magic moment.
+
+(12-18s) Article "Anthropic $70B revenue" transforms with AI sparkles into 4 social posts (Twitter, LinkedIn, Threads, Instagram) with checkmarks. Character counter 229/280.
+
+(18-24s) Zoom into live Twitter showing published post with hashtags and engagement. Real proof.
+
+(24-30s) Logo reveal: platform icons circle "AI News Hub" logo. Text: "Open Source • Privacy First • Free Forever". Clean finale.
+
+Professional software demo style, smooth movements, purple brand color, 1080p quality.
+
+====================================
