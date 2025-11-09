@@ -17,23 +17,34 @@ Choose the installation method that works best for you:
 1. **Download the code:**
    ```bash
    git clone https://github.com/larry311012/ai-news-hub.git
-   cd ai-news-hub/ai-news-hub-web
+   cd ai-news-hub/backend
    ```
 
-2. **Run the setup script:**
+2. **Create virtual environment:**
    ```bash
-   cd backend
+   python3 -m venv venv
+   source venv/bin/activate      # Mac/Linux
+   # OR: venv\Scripts\activate   # Windows
+   ```
+
+3. **Install setup dependencies:**
+   ```bash
+   pip install cryptography python-dotenv
+   ```
+
+4. **Run the setup script:**
+   ```bash
    python3 setup.py
    ```
 
-3. **That's it!** The script will:
+5. **That's it!** The script will:
    - ✅ Check your system
    - ✅ Install all dependencies
    - ✅ Generate secure keys automatically
-   - ✅ Set up the database
+   - ✅ Set up the database with anonymous user
    - ✅ Configure everything for you
 
-4. **Start the app** (follow the instructions shown by the script):
+6. **Start the app** (follow the instructions shown by the script):
    - Open Terminal 1: Start backend
    - Open Terminal 2: Start frontend
    - Visit http://localhost:3000
@@ -52,7 +63,7 @@ Choose the installation method that works best for you:
 1. **Download the code:**
    ```bash
    git clone https://github.com/larry311012/ai-news-hub.git
-   cd ai-news-hub/ai-news-hub-web
+   cd ai-news-hub
    ```
 
 2. **Start everything:**

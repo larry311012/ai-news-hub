@@ -124,13 +124,20 @@ We've completely redesigned the installation process - **no technical expertise 
 ```bash
 # 1. Download the code
 git clone https://github.com/larry311012/ai-news-hub.git
-cd ai-news-hub/ai-news-hub-web/backend
+cd ai-news-hub/backend
 
-# 2. Run the setup script
-python3 setup.py        # Mac/Linux
-# OR double-click setup.bat on Windows
+# 2. Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # Mac/Linux
+# OR: venv\Scripts\activate  # Windows
 
-# 3. Follow the on-screen instructions
+# 3. Install setup dependencies
+pip install cryptography python-dotenv
+
+# 4. Run the automated setup script
+python3 setup.py
+
+# 5. Follow the on-screen instructions
 # That's it! Setup takes ~5 minutes
 ```
 
@@ -138,7 +145,7 @@ python3 setup.py        # Mac/Linux
 - ✅ Checks your system
 - ✅ Installs all dependencies
 - ✅ Generates secure keys (no copy/paste!)
-- ✅ Sets up database
+- ✅ Sets up database with anonymous user
 - ✅ Configures everything for you
 
 ### 🐳 Option 2: Docker (Easiest - One Command!)
@@ -206,22 +213,20 @@ All scripts automatically:
 
 ### First-Time Setup (After Installation)
 
+**No account creation needed!** AI News Hub runs in single-user mode - just open and use.
+
 1. **Open the app:** <http://localhost:3000>
 
-2. **Create your account:**
-   - Click "Register"
-   - Use any email (stored locally)
-
-3. **Add your AI API key:**
+2. **Add your AI API key:**
    - Go to Profile → API Keys
    - Add OpenAI key from <https://platform.openai.com/api-keys>
    - Or Anthropic key from <https://console.anthropic.com/>
 
-4. **Optional - Connect social media:**
+3. **Optional - Connect social media:**
    - Settings → Social Connections
    - Connect Twitter, LinkedIn, Instagram, or Threads
 
-5. **Start generating posts!**
+4. **Start generating posts!**
    - Add RSS feeds or paste article URLs
    - Click "Generate Post"
    - Edit and publish to connected platforms
