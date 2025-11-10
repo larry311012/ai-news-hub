@@ -61,6 +61,23 @@ class BookmarkRequest(BaseModel):
     article_id: int
 
 
+class RefreshInfo(BaseModel):
+    """Refresh information for modern refresh endpoint"""
+    new_articles_count: int
+    has_updates: bool
+    message: str
+    last_refresh: Optional[datetime] = None
+
+
+class RefreshResponse(BaseModel):
+    """Response model for refresh endpoint"""
+    success: bool
+    refresh_info: RefreshInfo
+    articles: List[ArticleResponse]
+    total: int
+    returned: int
+
+
 @router.get("", response_model=List[ArticleResponse])
 async def get_articles(
     skip: int = 0,
@@ -132,6 +149,124 @@ async def get_articles(
     all_articles.sort(key=lambda x: x.published, reverse=True)
 
     return all_articles
+
+
+# ============================================================================
+# MODERN REFRESH ENDPOINT
+# ============================================================================
+
+
+@router.get("/refresh", response_model=RefreshResponse)
+async def refresh_articles(
+    skip: int = Query(0, description="Number of articles to skip for pagination"),
+    limit: int = Query(50, description="Maximum number of articles to return"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    source: Optional[str] = Query(None, description="Filter by source"),
+    since: Optional[str] = Query(None, description="ISO datetime to check for new articles since"),
+    db: Session = Depends(get_db),
+):
+    """
+    Modern refresh endpoint that tracks new articles since last refresh.
+
+    This endpoint enhances the standard articles endpoint by:
+    - Tracking new article counts since last refresh
+    - Providing status feedback (has_updates or not)
+    - Returning enriched response with refresh_info
+
+    Args:
+        skip: Pagination offset
+        limit: Max articles to return
+        category: Optional category filter
+        source: Optional source filter
+        since: Optional ISO datetime to check for articles newer than this
+        db: Database session
+
+    Returns:
+        RefreshResponse with refresh_info and articles
+    """
+    try:
+        # Determine the timestamp for "new" articles
+        if since:
+            try:
+                # Parse ISO datetime string
+                last_refresh_time = datetime.fromisoformat(since.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                # Invalid timestamp format - treat as first refresh
+                last_refresh_time = None
+        else:
+            # No timestamp provided - this is first refresh
+            last_refresh_time = None
+
+        # Build base query
+        query = db.query(Article)
+
+        # Apply filters
+        if category:
+            query = query.filter(Article.category == category)
+        if source:
+            query = query.filter(Article.source == source)
+
+        # Count total articles matching filters (for pagination info)
+        total_count = query.count()
+
+        # Count new articles since last refresh
+        if last_refresh_time:
+            # Count articles fetched after the last refresh time
+            new_articles_query = query.filter(Article.fetched_at > last_refresh_time)
+            new_articles_count = new_articles_query.count()
+        else:
+            # First refresh - all articles are "new"
+            new_articles_count = total_count
+
+        # Determine if there are updates
+        has_updates = new_articles_count > 0
+
+        # Generate appropriate message
+        if new_articles_count == 0:
+            message = "No new updates"
+        elif new_articles_count == 1:
+            message = "1 new article loaded"
+        else:
+            message = f"{new_articles_count} new articles loaded"
+
+        # Fetch articles with pagination (ordered by most recent first)
+        articles = (
+            query.order_by(Article.published.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+        # Build refresh info
+        refresh_info = RefreshInfo(
+            new_articles_count=new_articles_count,
+            has_updates=has_updates,
+            message=message,
+            last_refresh=datetime.utcnow()
+        )
+
+        # Build response
+        response = RefreshResponse(
+            success=True,
+            refresh_info=refresh_info,
+            articles=[ArticleResponse.model_validate(article) for article in articles],
+            total=total_count,
+            returned=len(articles)
+        )
+
+        logger.info(
+            f"Refresh completed: {new_articles_count} new articles "
+            f"(total: {total_count}, returned: {len(articles)})"
+        )
+
+        return response
+
+    except Exception as e:
+        logger.error(f"Error in refresh endpoint: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error refreshing articles: {str(e)}"
+        )
 
 
 # ============================================================================

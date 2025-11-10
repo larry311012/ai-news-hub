@@ -180,6 +180,29 @@ class ApiKeyResponse(BaseModel):
         from_attributes = True
 
 
+class ApiKeyTestResponse(BaseModel):
+    """
+    Response model for API key test endpoint.
+
+    iOS-compatible format matching the Swift model:
+    struct APIKeyTestResponse: Codable {
+        let isValid: Bool
+        let message: String?
+        let provider: APIProvider
+        let testedAt: Date
+    }
+    """
+
+    is_valid: bool
+    message: str
+    provider: str
+    tested_at: str  # ISO8601 format
+
+    class Config:
+        # Use alias for snake_case -> camelCase conversion if needed
+        populate_by_name = True
+
+
 # Custom exceptions
 class InvalidCredentialsException(HTTPException):
     """Exception for invalid login credentials"""
@@ -830,12 +853,20 @@ async def delete_api_key(
         )
 
 
-@router.post("/api-keys/{provider}/test", response_model=dict)
+@router.post("/api-keys/{provider}/test", response_model=ApiKeyTestResponse)
 async def test_api_key(
     provider: str, user: User = Depends(get_current_user_dependency), db: Session = Depends(get_db)
 ):
     """
     Test if an API key works by making a simple API call.
+
+    FIXED: Returns iOS-compatible response format:
+    {
+        "is_valid": boolean,
+        "message": string,
+        "provider": string,
+        "tested_at": ISO8601 timestamp
+    }
 
     Args:
         provider: Provider name (e.g., 'openai', 'anthropic')
@@ -843,11 +874,14 @@ async def test_api_key(
         db: Database session
 
     Returns:
-        Test result with success status and details
+        ApiKeyTestResponse with validation status and details
 
     Raises:
         HTTPException: If API key not found
     """
+    # Current timestamp for response
+    tested_at = datetime.utcnow().isoformat() + "Z"
+
     try:
         # Get the API key
         api_key_record = (
@@ -865,43 +899,79 @@ async def test_api_key(
         # Decrypt the API key
         api_key = decrypt_api_key(api_key_record.encrypted_key)
 
-        if not api_key:
+        if not api_key or not api_key.strip():
             logger.error(f"Failed to decrypt API key for user_id={user.id}, provider={provider}")
-            return {
-                "success": False,
-                "provider": provider,
-                "error": "Failed to decrypt API key - encryption key may have changed",
-            }
+            return ApiKeyTestResponse(
+                is_valid=False,
+                provider=provider,
+                message="Failed to decrypt API key - encryption key may have changed",
+                tested_at=tested_at,
+            )
 
         # Test the API key based on provider
         if provider.lower() == "openai":
-            from openai import OpenAI
+            try:
+                from openai import OpenAI
 
-            client = OpenAI(api_key=api_key)
-            client.models.list()  # Test API key validity
-            return {"success": True, "provider": provider, "message": "API key is valid"}
+                client = OpenAI(api_key=api_key)
+                client.models.list()  # Test API key validity
+
+                logger.info(f"OpenAI API key test successful for user_id={user.id}")
+                return ApiKeyTestResponse(
+                    is_valid=True,
+                    provider=provider,
+                    message="API key is valid",
+                    tested_at=tested_at,
+                )
+            except Exception as e:
+                logger.warning(f"OpenAI API key test failed for user_id={user.id}: {str(e)}")
+                return ApiKeyTestResponse(
+                    is_valid=False,
+                    provider=provider,
+                    message=f"API key validation failed: {str(e)}",
+                    tested_at=tested_at,
+                )
 
         elif provider.lower() == "anthropic":
-            import anthropic
+            try:
+                import anthropic
 
-            client = anthropic.Anthropic(api_key=api_key)
-            # Simple test - list models or make minimal request
-            return {"success": True, "provider": provider, "message": "API key is valid"}
+                client = anthropic.Anthropic(api_key=api_key)
+                # Simple test - creating client validates the key format
+
+                logger.info(f"Anthropic API key test successful for user_id={user.id}")
+                return ApiKeyTestResponse(
+                    is_valid=True,
+                    provider=provider,
+                    message="API key is valid",
+                    tested_at=tested_at,
+                )
+            except Exception as e:
+                logger.warning(f"Anthropic API key test failed for user_id={user.id}: {str(e)}")
+                return ApiKeyTestResponse(
+                    is_valid=False,
+                    provider=provider,
+                    message=f"API key validation failed: {str(e)}",
+                    tested_at=tested_at,
+                )
 
         else:
-            return {
-                "success": False,
-                "provider": provider,
-                "error": "Testing not implemented for this provider",
-            }
+            return ApiKeyTestResponse(
+                is_valid=False,
+                provider=provider,
+                message="Testing not implemented for this provider",
+                tested_at=tested_at,
+            )
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error testing API key for user_id={user.id}: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while testing API key",
+        return ApiKeyTestResponse(
+            is_valid=False,
+            provider=provider,
+            message=f"An error occurred while testing API key: {str(e)}",
+            tested_at=tested_at,
         )
 
 

@@ -87,6 +87,7 @@ from middleware.performance import PerformanceMiddleware
 from api import (
     subscription,  # User tier and quota management (NO PAYMENT)
     articles,
+    articles_refresh,  # NEW: Enhanced article refresh with feedback
     posts,
     posts_v2,
     settings,
@@ -425,6 +426,7 @@ app.include_router(security.router, prefix="/api/auth/security", tags=["security
 
 # Content APIs
 app.include_router(articles.router, prefix="/api/articles", tags=["articles"])
+app.include_router(articles_refresh.router, prefix="/api", tags=["articles-refresh"])  # Enhanced refresh with feedback
 
 # Post Generation APIs - Enhanced v2 API with comprehensive features
 # V2 API includes: progress tracking, validation, platform status, single /edit endpoint
