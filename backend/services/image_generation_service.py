@@ -549,6 +549,9 @@ class ImageGenerationService:
             "response_format": "b64_json"
         }
 
+        logger.info(f"Calling DALL-E API with model={cls.DALLE_MODEL}, size={size}, quality={quality}, prompt_length={len(prompt)}")
+        logger.debug(f"DALL-E prompt: {prompt[:200]}...")  # Log first 200 chars for debugging
+
         async with httpx.AsyncClient(timeout=60.0) as client:
             try:
                 response = await client.post(
@@ -557,34 +560,68 @@ class ImageGenerationService:
                     headers=headers
                 )
 
+                # Handle different error status codes
                 if response.status_code == 401:
-                    raise ImageGenerationError("Invalid DALL-E API key")
+                    raise ImageGenerationError("Invalid OpenAI API key. Please check your API key in Profile Settings.")
                 elif response.status_code == 429:
-                    raise ImageGenerationError("Rate limit exceeded")
+                    raise ImageGenerationError("OpenAI rate limit exceeded. Please try again in a few minutes.")
                 elif response.status_code == 400:
-                    error_data = response.json()
-                    error_msg = error_data.get("error", {}).get("message", "Bad request")
-                    raise ImageGenerationError(f"API error: {error_msg}")
+                    try:
+                        error_data = response.json()
+                        error_msg = error_data.get("error", {}).get("message", "Bad request")
+                        logger.error(f"DALL-E 400 error: {error_msg}")
+                        raise ImageGenerationError(f"Invalid request: {error_msg}")
+                    except Exception:
+                        raise ImageGenerationError("Invalid request to OpenAI API")
+                elif response.status_code == 500:
+                    # OpenAI server error
+                    try:
+                        error_data = response.json()
+                        error_msg = error_data.get("error", {}).get("message", "OpenAI server error")
+                        logger.error(f"DALL-E 500 error: {error_msg}")
+                        raise ImageGenerationError(f"OpenAI server error: {error_msg}. This may be due to: content policy violation, prompt too complex, or temporary server issue. Try simplifying your prompt or try again later.")
+                    except Exception:
+                        logger.error(f"DALL-E 500 error: Unable to parse error response")
+                        raise ImageGenerationError("OpenAI server error (500). The prompt may violate content policy or be too complex. Try a simpler prompt or try again later.")
+                elif response.status_code >= 500:
+                    # Other server errors
+                    raise ImageGenerationError(f"OpenAI server error ({response.status_code}). Please try again later.")
 
+                # Raise for any other non-2xx status
                 response.raise_for_status()
+
+                # Parse response
                 data = response.json()
 
                 # Extract image data
+                if "data" not in data or len(data["data"]) == 0:
+                    raise ImageGenerationError("No image data returned from OpenAI API")
+
                 image_b64 = data["data"][0]["b64_json"]
                 revised_prompt = data["data"][0].get("revised_prompt", prompt)
 
                 # Decode base64 to bytes
                 image_bytes = base64.b64decode(image_b64)
 
+                logger.info(f"Successfully generated image, size: {len(image_bytes)} bytes")
+
                 return {
                     "image_bytes": image_bytes,
                     "revised_prompt": revised_prompt
                 }
 
+            except ImageGenerationError:
+                # Re-raise our custom errors
+                raise
             except httpx.TimeoutException:
-                raise ImageGenerationError("API request timed out (60s)")
+                logger.error("DALL-E API timeout after 60 seconds")
+                raise ImageGenerationError("Image generation timed out (60s). OpenAI servers may be busy. Please try again.")
             except httpx.HTTPError as e:
-                raise ImageGenerationError(f"HTTP error: {str(e)}")
+                logger.error(f"DALL-E HTTP error: {str(e)}")
+                raise ImageGenerationError(f"Network error while contacting OpenAI: {str(e)}")
+            except Exception as e:
+                logger.error(f"Unexpected error in DALL-E API call: {str(e)}")
+                raise ImageGenerationError(f"Unexpected error: {str(e)}")
 
     @classmethod
     async def _save_image(

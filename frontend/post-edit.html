@@ -142,16 +142,22 @@
                             <nav class="flex space-x-8" role="tablist">
                                 <button v-for="platform in platforms"
                                         :key="platform.id"
-                                        @click="selectedPlatform = platform.id"
+                                        @click="!platform.disabled && (selectedPlatform = platform.id)"
+                                        :disabled="platform.disabled"
+                                        :title="platform.disabled ? 'Coming soon - In development' : ''"
                                         :class="[
-                                            selectedPlatform === platform.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                                            getPlatformValidationState(platform.id) === 'error' && selectedPlatform !== platform.id ? 'border-red-300' : ''
+                                            platform.disabled ? 'opacity-40 cursor-not-allowed border-transparent text-gray-400' : '',
+                                            !platform.disabled && selectedPlatform === platform.id ? 'border-indigo-500 text-indigo-600' : '',
+                                            !platform.disabled && selectedPlatform !== platform.id ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' : '',
+                                            !platform.disabled && getPlatformValidationState(platform.id) === 'error' && selectedPlatform !== platform.id ? 'border-red-300' : ''
                                         ]"
                                         class="relative flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors focus:outline-none"
                                         :aria-selected="selectedPlatform === platform.id"
+                                        :aria-disabled="platform.disabled"
                                         role="tab">
                                     <component :is="'span'" v-html="platform.icon" class="w-5 h-5 mr-2"></component>
                                     <span>{{ platform.name }}</span>
+                                    <span v-if="platform.disabled" class="ml-2 text-xs px-2 py-0.5 bg-gray-200 text-gray-600 rounded-full">Soon</span>
 
                                     <!-- Validation Badge -->
                                     <span v-if="getPlatformValidationState(platform.id) === 'error'"
@@ -518,23 +524,25 @@ Tip: Add emojis and hashtags for better engagement!"
                             </button>
                         </div>
                         <div class="space-y-3">
-                            <div v-for="platform in platforms" :key="platform.id" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div v-for="platform in platforms" :key="platform.id"
+                                 :class="['flex items-center justify-between p-3 rounded-lg', platform.disabled ? 'bg-gray-100 opacity-50' : 'bg-gray-50']">
                                 <div class="flex items-center space-x-3">
                                     <input type="checkbox"
                                            :id="`platform-${platform.id}`"
                                            v-model="selectedPlatforms"
                                            :value="platform.id"
-                                           :disabled="!platformConnections[platform.id].connected || (platform.id === 'instagram' && !instagramImage)"
-                                           :title="!platformConnections[platform.id].connected ? 'Connect ' + platform.name + ' first' : (platform.id === 'instagram' && !instagramImage ? 'Generate an image first' : 'Select to publish to ' + platform.name)"
+                                           :disabled="platform.disabled || !platformConnections[platform.id].connected || (platform.id === 'instagram' && !instagramImage)"
+                                           :title="platform.disabled ? 'Coming soon - In development' : (!platformConnections[platform.id].connected ? 'Connect ' + platform.name + ' first' : (platform.id === 'instagram' && !instagramImage ? 'Generate an image first' : 'Select to publish to ' + platform.name))"
                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                                    <label :for="`platform-${platform.id}`" class="flex items-center space-x-2 cursor-pointer">
+                                    <label :for="`platform-${platform.id}`" :class="['flex items-center space-x-2', platform.disabled ? 'cursor-not-allowed' : 'cursor-pointer']">
                                         <component :is="'span'" v-html="platform.icon" class="w-5 h-5"></component>
-                                        <span class="text-sm font-medium text-gray-900">{{ platform.name }}</span>
+                                        <span :class="['text-sm font-medium', platform.disabled ? 'text-gray-400' : 'text-gray-900']">{{ platform.name }}</span>
+                                        <span v-if="platform.disabled" class="text-xs px-2 py-0.5 bg-gray-300 text-gray-600 rounded-full">Soon</span>
                                     </label>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <!-- Connection Status -->
-                                    <span v-if="platformConnections[platform.id].connected"
+                                    <span v-if="!platform.disabled && platformConnections[platform.id].connected"
                                           class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
                                           :title="platformConnections[platform.id].username ? 'Connected as @' + platformConnections[platform.id].username : 'Connected'">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -542,9 +550,13 @@ Tip: Add emojis and hashtags for better engagement!"
                                         </svg>
                                         Connected
                                     </span>
-                                    <span v-else-if="platformConnections[platform.id].status === 'checking'"
+                                    <span v-else-if="!platform.disabled && platformConnections[platform.id].status === 'checking'"
                                           class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                                         Checking...
+                                    </span>
+                                    <span v-else-if="platform.disabled"
+                                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-500">
+                                        Development
                                     </span>
                                     <button v-else
                                             @click="connectPlatform(platform.id)"
